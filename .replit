@@ -39,3 +39,11 @@ waitForPort = 5000
 
 [deployment]
 run = ["sh", "-c", "cd backend && npm install && cd ../frontend && npm install && npm start"]
+
+[[ports]]
+localPort = 3000
+externalPort = 3000
+
+[[ports]]
+localPort = 5000
+externalPort = 80
