@@ -1,0 +1,190 @@
+<div class="expense-list-container">
+  <div class="page-header">
+    <div class="title-section">
+      <h1 class="page-title">Expenses</h1>
+      <p class="page-subtitle">Track and manage your business expenses</p>
+    </div>
+    
+    <div class="action-buttons">
+      <button mat-raised-button color="primary" (click)="addExpense()">
+        <mat-icon>add</mat-icon>
+        Add Expense
+      </button>
+    </div>
+  </div>
+  
+  <div class="dashboard-layout">
+    <!-- Summary and Chart -->
+    <div class="summary-section">
+      <!-- Summary Card -->
+      <mat-card class="summary-card">
+        <mat-card-content>
+          <div class="summary-total">
+            <div class="total-label">Total Expenses</div>
+            <div class="total-value">₹{{ totalExpenses | number:'1.2-2' }}</div>
+          </div>
+        </mat-card-content>
+      </mat-card>
+      
+      <!-- Chart Card -->
+      <mat-card class="chart-card">
+        <mat-card-header>
+          <mat-card-title>Expenses by Category</mat-card-title>
+        </mat-card-header>
+        <mat-card-content>
+          <div class="chart-container" *ngIf="expensesByCategoryData.length > 0">
+            <canvas baseChart
+                    [data]="expenseChartData"
+                    [options]="expenseChartOptions"
+                    [type]="'doughnut'">
+            </canvas>
+          </div>
+          <div class="no-data-chart" *ngIf="expensesByCategoryData.length === 0">
+            <mat-icon>pie_chart</mat-icon>
+            <p>No expense data available for chart</p>
+          </div>
+        </mat-card-content>
+      </mat-card>
+    </div>
+    
+    <!-- Filter and List -->
+    <div class="expenses-section">
+      <!-- Filter Card -->
+      <mat-card class="filter-card">
+        <mat-card-content>
+          <form [formGroup]="filterForm" class="filter-form">
+            <div class="filter-row">
+              <mat-form-field appearance="outline" class="search-field">
+                <mat-label>Search Expenses</mat-label>
+                <input matInput formControlName="search" placeholder="Search by title or notes">
+                <mat-icon matSuffix>search</mat-icon>
+              </mat-form-field>
+              
+              <mat-form-field appearance="outline">
+                <mat-label>Category</mat-label>
+                <mat-select formControlName="category">
+                  <mat-option value="">All Categories</mat-option>
+                  <mat-option *ngFor="let category of expenseCategories" [value]="category.name">
+                    {{ category.name }}
+                  </mat-option>
+                </mat-select>
+              </mat-form-field>
+            </div>
+            
+            <div class="filter-row">
+              <mat-form-field appearance="outline">
+                <mat-label>Start Date</mat-label>
+                <input matInput [matDatepicker]="startPicker" formControlName="startDate">
+                <mat-datepicker-toggle matSuffix [for]="startPicker"></mat-datepicker-toggle>
+                <mat-datepicker #startPicker></mat-datepicker>
+              </mat-form-field>
+              
+              <mat-form-field appearance="outline">
+                <mat-label>End Date</mat-label>
+                <input matInput [matDatepicker]="endPicker" formControlName="endDate">
+                <mat-datepicker-toggle matSuffix [for]="endPicker"></mat-datepicker-toggle>
+                <mat-datepicker #endPicker></mat-datepicker>
+              </mat-form-field>
+              
+              <div class="filter-actions">
+                <button mat-stroked-button color="primary" (click)="applyDateFilter()">
+                  Apply Filters
+                </button>
+                <button mat-stroked-button (click)="clearFilters()">
+                  Clear Filters
+                </button>
+              </div>
+            </div>
+          </form>
+        </mat-card-content>
+      </mat-card>
+      
+      <!-- Loading Indicator -->
+      <div *ngIf="isLoading" class="loading-container">
+        <mat-spinner diameter="40"></mat-spinner>
+        <p>Loading expenses...</p>
+      </div>
+      
+      <!-- Expenses Table -->
+      <div *ngIf="!isLoading" class="table-container mat-elevation-z2">
+        <table mat-table [dataSource]="dataSource" matSort>
+          
+          <!-- Title Column -->
+          <ng-container matColumnDef="title">
+            <th mat-header-cell *matHeaderCellDef mat-sort-header>Title</th>
+            <td mat-cell *matCellDef="let expense">
+              <div class="title-cell">
+                <span class="expense-title">{{ expense.title }}</span>
+                <span *ngIf="expense.notes" class="expense-notes">{{ expense.notes }}</span>
+              </div>
+            </td>
+          </ng-container>
+          
+          <!-- Category Column -->
+          <ng-container matColumnDef="category">
+            <th mat-header-cell *matHeaderCellDef mat-sort-header>Category</th>
+            <td mat-cell *matCellDef="let expense">
+              <span class="category-badge">{{ expense.category }}</span>
+            </td>
+          </ng-container>
+          
+          <!-- Amount Column -->
+          <ng-container matColumnDef="amount">
+            <th mat-header-cell *matHeaderCellDef mat-sort-header>Amount</th>
+            <td mat-cell *matCellDef="let expense" class="amount-cell">
+              ₹{{ expense.amount | number:'1.2-2' }}
+            </td>
+          </ng-container>
+          
+          <!-- Date Column -->
+          <ng-container matColumnDef="date">
+            <th mat-header-cell *matHeaderCellDef mat-sort-header>Date</th>
+            <td mat-cell *matCellDef="let expense">{{ expense.date | date:'dd MMM yyyy' }}</td>
+          </ng-container>
+          
+          <!-- Recurring Column -->
+          <ng-container matColumnDef="isRecurring">
+            <th mat-header-cell *matHeaderCellDef mat-sort-header>Type</th>
+            <td mat-cell *matCellDef="let expense">
+              <span class="recurring-badge" [ngClass]="getRecurringClass(expense.isRecurring)">
+                {{ getRecurringBadge(expense.isRecurring, expense.recurringFrequency) }}
+              </span>
+            </td>
+          </ng-container>
+          
+          <!-- Actions Column -->
+          <ng-container matColumnDef="actions">
+            <th mat-header-cell *matHeaderCellDef>Actions</th>
+            <td mat-cell *matCellDef="let expense">
+              <div class="action-buttons">
+                <button mat-icon-button color="primary" (click)="editExpense(expense)" matTooltip="Edit Expense">
+                  <mat-icon>edit</mat-icon>
+                </button>
+                <button mat-icon-button color="warn" (click)="deleteExpense(expense)" matTooltip="Delete Expense">
+                  <mat-icon>delete</mat-icon>
+                </button>
+              </div>
+            </td>
+          </ng-container>
+          
+          <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+          <tr mat-row *matRowDef="let row; columns: displayedColumns;" (click)="editExpense(row)" class="clickable-row"></tr>
+          
+          <!-- Row shown when no data matches the filter -->
+          <tr class="mat-row" *matNoDataRow>
+            <td class="mat-cell" colspan="6">
+              <div class="no-data-message">
+                <mat-icon>receipt</mat-icon>
+                <span>No expenses found</span>
+                <p *ngIf="filterForm.get('search')?.value">No expenses matching "{{ filterForm.get('search')?.value }}"</p>
+                <button mat-stroked-button color="primary" (click)="clearFilters()">Clear Filters</button>
+              </div>
+            </td>
+          </tr>
+        </table>
+        
+        <mat-paginator [pageSizeOptions]="[10, 25, 50, 100]" showFirstLastButtons></mat-paginator>
+      </div>
+    </div>
+  </div>
+</div>

@@ -1,0 +1,129 @@
+<div class="expense-form-container">
+  <div class="page-header">
+    <h1 class="page-title">{{ isEditMode ? 'Edit Expense' : 'Add New Expense' }}</h1>
+    <p class="page-subtitle">{{ isEditMode ? 'Update expense information' : 'Record a new expense' }}</p>
+  </div>
+  
+  <div *ngIf="isLoading" class="loading-container">
+    <mat-spinner diameter="40"></mat-spinner>
+    <p>{{ isEditMode ? 'Loading expense details...' : 'Initializing form...' }}</p>
+  </div>
+  
+  <div *ngIf="!isLoading">
+    <form [formGroup]="expenseForm" (ngSubmit)="onSubmit()">
+      <mat-card class="form-card">
+        <mat-card-header>
+          <mat-card-title>Expense Details</mat-card-title>
+        </mat-card-header>
+        
+        <mat-card-content>
+          <div class="form-row">
+            <mat-form-field appearance="outline" class="full-width">
+              <mat-label>Expense Title</mat-label>
+              <input matInput formControlName="title" placeholder="Enter expense title">
+              <mat-error *ngIf="expenseForm.get('title')?.hasError('required')">
+                Expense title is required
+              </mat-error>
+              <mat-error *ngIf="expenseForm.get('title')?.hasError('maxlength')">
+                Expense title must be less than 100 characters
+              </mat-error>
+            </mat-form-field>
+          </div>
+          
+          <div class="form-row two-column">
+            <mat-form-field appearance="outline">
+              <mat-label>Amount</mat-label>
+              <input matInput type="number" formControlName="amount" placeholder="0.00" min="0" step="0.01">
+              <span matPrefix>₹&nbsp;</span>
+              <mat-error *ngIf="expenseForm.get('amount')?.hasError('required')">
+                Amount is required
+              </mat-error>
+              <mat-error *ngIf="expenseForm.get('amount')?.hasError('min')">
+                Amount must be positive
+              </mat-error>
+            </mat-form-field>
+            
+            <mat-form-field appearance="outline">
+              <mat-label>Date</mat-label>
+              <input matInput [matDatepicker]="datePicker" formControlName="date">
+              <mat-datepicker-toggle matSuffix [for]="datePicker"></mat-datepicker-toggle>
+              <mat-datepicker #datePicker></mat-datepicker>
+              <mat-error *ngIf="expenseForm.get('date')?.hasError('required')">
+                Date is required
+              </mat-error>
+            </mat-form-field>
+          </div>
+          
+          <div class="form-row">
+            <mat-form-field appearance="outline" class="full-width">
+              <mat-label>Category</mat-label>
+              <mat-select formControlName="category">
+                <mat-option *ngFor="let category of expenseCategories" [value]="category.name">
+                  {{ category.name }}
+                </mat-option>
+                <mat-option value="add_new" (click)="showAddCategoryForm()">
+                  <mat-icon>add_circle</mat-icon> Add New Category
+                </mat-option>
+              </mat-select>
+              <mat-error *ngIf="expenseForm.get('category')?.hasError('required')">
+                Category is required
+              </mat-error>
+            </mat-form-field>
+          </div>
+          
+          <!-- Add New Category Form -->
+          <div class="add-category-form" *ngIf="isAddingNewCategory">
+            <mat-card class="inner-card">
+              <mat-card-header>
+                <mat-card-title>Add New Category</mat-card-title>
+              </mat-card-header>
+              <mat-card-content>
+                <mat-form-field appearance="outline" class="full-width">
+                  <mat-label>Category Name</mat-label>
+                  <input matInput [(ngModel)]="newCategoryName" [ngModelOptions]="{standalone: true}" placeholder="Enter category name">
+                </mat-form-field>
+              </mat-card-content>
+              <mat-card-actions>
+                <button mat-button type="button" (click)="cancelAddCategory()">Cancel</button>
+                <button mat-raised-button color="primary" type="button" (click)="addNewCategory()" [disabled]="!newCategoryName.trim()">Add Category</button>
+              </mat-card-actions>
+            </mat-card>
+          </div>
+          
+          <div class="form-row">
+            <div class="recurring-section">
+              <mat-checkbox formControlName="isRecurring">This is a recurring expense</mat-checkbox>
+              
+              <mat-form-field appearance="outline" *ngIf="expenseForm.get('isRecurring')?.value" class="frequency-field">
+                <mat-label>Frequency</mat-label>
+                <mat-select formControlName="recurringFrequency">
+                  <mat-option *ngFor="let option of recurringFrequencyOptions" [value]="option.value">
+                    {{ option.label }}
+                  </mat-option>
+                </mat-select>
+                <mat-error *ngIf="expenseForm.get('recurringFrequency')?.hasError('required')">
+                  Frequency is required for recurring expenses
+                </mat-error>
+              </mat-form-field>
+            </div>
+          </div>
+          
+          <div class="form-row">
+            <mat-form-field appearance="outline" class="full-width">
+              <mat-label>Notes</mat-label>
+              <textarea matInput formControlName="notes" rows="3" placeholder="Enter additional details or notes"></textarea>
+            </mat-form-field>
+          </div>
+        </mat-card-content>
+      </mat-card>
+      
+      <div class="form-actions">
+        <button mat-button type="button" (click)="onCancel()">Cancel</button>
+        <button mat-raised-button color="primary" type="submit" [disabled]="expenseForm.invalid || isLoading">
+          <mat-spinner diameter="20" *ngIf="isLoading" class="button-spinner"></mat-spinner>
+          <span *ngIf="!isLoading">{{ isEditMode ? 'Update Expense' : 'Save Expense' }}</span>
+        </button>
+      </div>
+    </form>
+  </div>
+</div>

@@ -1,0 +1,269 @@
+.invoice-form-container {
+  padding: 16px;
+}
+
+.page-header {
+  margin-bottom: 24px;
+  
+  .page-title {
+    margin: 0;
+    font-size: 1.8rem;
+    color: #2C3E50;
+  }
+  
+  .page-subtitle {
+    margin: 8px 0 0;
+    font-size: 1rem;
+    color: #7f8c8d;
+  }
+}
+
+.loading-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  margin: 40px 0;
+  
+  p {
+    margin-top: 16px;
+    color: #666;
+  }
+}
+
+.form-card {
+  margin-bottom: 24px;
+  border-radius: 8px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
+  
+  .mat-card-header {
+    padding: 16px 16px 0;
+    
+    .mat-card-title {
+      font-size: 1.2rem;
+      margin-bottom: 8px;
+      color: #2C3E50;
+    }
+  }
+  
+  .mat-card-content {
+    padding: 16px;
+  }
+}
+
+.form-row {
+  margin-bottom: 16px;
+  
+  &.two-column {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+  }
+  
+  &.three-column {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 16px;
+  }
+  
+  &:last-child {
+    margin-bottom: 0;
+  }
+}
+
+.full-width {
+  width: 100%;
+}
+
+// Products Table Styles
+.products-table {
+  border: 1px solid #e0e0e0;
+  border-radius: 4px;
+  overflow: hidden;
+  margin-bottom: 16px;
+}
+
+.products-header {
+  display: grid;
+  grid-template-columns: 3fr 1fr 1fr 1fr 1fr 1.5fr 0.5fr;
+  gap: 8px;
+  background-color: #f5f5f5;
+  padding: 12px 16px;
+  font-weight: 500;
+  border-bottom: 1px solid #e0e0e0;
+}
+
+.product-row {
+  display: grid;
+  grid-template-columns: 3fr 1fr 1fr 1fr 1fr 1.5fr 0.5fr;
+  gap: 8px;
+  padding: 8px 16px;
+  border-bottom: 1px solid #f0f0f0;
+  
+  &:last-child {
+    border-bottom: none;
+  }
+}
+
+.product-cell {
+  display: flex;
+  align-items: center;
+  
+  &.product-name {
+    min-width: 150px;
+  }
+  
+  &.quantity,
+  &.price,
+  &.discount,
+  &.tax,
+  &.total {
+    min-width: 80px;
+  }
+  
+  &.actions {
+    justify-content: center;
+  }
+  
+  .no-label-field {
+    width: 100%;
+    
+    .mat-form-field-wrapper {
+      padding-bottom: 0;
+    }
+    
+    .mat-form-field-infix {
+      padding: 0.5em 0;
+      border-top: 0;
+    }
+    
+    .mat-form-field-underline {
+      bottom: 0;
+    }
+  }
+}
+
+.add-product-button {
+  margin-top: 16px;
+  display: flex;
+  justify-content: flex-start;
+}
+
+// Invoice Totals
+.invoice-totals {
+  margin-top: 24px;
+  border-top: 1px solid #e0e0e0;
+  padding-top: 16px;
+  width: 300px;
+  margin-left: auto;
+}
+
+.totals-row {
+  display: flex;
+  justify-content: space-between;
+  padding: 8px 0;
+  
+  .total-label {
+    font-weight: 500;
+    color: #5c6a78;
+  }
+  
+  .total-value {
+    font-weight: 500;
+  }
+  
+  &.total-final {
+    border-top: 1px solid #e0e0e0;
+    margin-top: 8px;
+    padding-top: 16px;
+    
+    .total-label, .total-value {
+      font-weight: 700;
+      font-size: 1.1rem;
+      color: #2C3E50;
+    }
+  }
+}
+
+.form-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 16px;
+  margin-top: 24px;
+  margin-bottom: 24px;
+  
+  button {
+    min-width: 120px;
+  }
+}
+
+.button-spinner {
+  margin: 0 auto;
+}
+
+// Print styles
+@media print {
+  .page-header, .form-actions, .actions {
+    display: none !important;
+  }
+  
+  .mat-card {
+    box-shadow: none !important;
+    border: 1px solid #ddd;
+  }
+  
+  .mat-form-field-underline {
+    display: none;
+  }
+  
+  button {
+    display: none;
+  }
+}
+
+// Responsive styles
+@media (max-width: 992px) {
+  .products-header, .product-row {
+    grid-template-columns: 3fr 1fr 1fr 1fr 1fr 1.5fr 0.5fr;
+  }
+}
+
+@media (max-width: 768px) {
+  .form-row.two-column,
+  .form-row.three-column {
+    grid-template-columns: 1fr;
+    gap: 0;
+  }
+  
+  .products-header {
+    display: none;
+  }
+  
+  .product-row {
+    grid-template-columns: 1fr;
+    border: 1px solid #e0e0e0;
+    margin-bottom: 16px;
+    border-radius: 4px;
+    padding: 16px;
+  }
+  
+  .product-cell {
+    margin-bottom: 8px;
+    
+    &:before {
+      content: attr(data-label);
+      font-weight: 500;
+      margin-right: 8px;
+    }
+    
+    &.actions {
+      justify-content: flex-end;
+      margin-top: 8px;
+      margin-bottom: 0;
+    }
+  }
+  
+  .invoice-totals {
+    width: 100%;
+  }
+}

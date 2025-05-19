@@ -1,0 +1,166 @@
+<div class="product-form-container">
+  <div class="page-header">
+    <h1 class="page-title">{{ isEditMode ? 'Edit Product' : 'Add New Product' }}</h1>
+    <p class="page-subtitle">{{ isEditMode ? 'Update product information' : 'Add a new product to your inventory' }}</p>
+  </div>
+  
+  <div *ngIf="isLoading" class="loading-container">
+    <mat-spinner diameter="40"></mat-spinner>
+    <p>{{ isEditMode ? 'Loading product details...' : 'Initializing form...' }}</p>
+  </div>
+  
+  <div *ngIf="!isLoading">
+    <form [formGroup]="productForm" (ngSubmit)="onSubmit()">
+      <mat-card class="form-card">
+        <mat-card-header>
+          <mat-card-title>Product Information</mat-card-title>
+        </mat-card-header>
+        
+        <mat-card-content>
+          <div class="form-row">
+            <mat-form-field appearance="outline" class="full-width">
+              <mat-label>Product Name</mat-label>
+              <input matInput formControlName="name" placeholder="Enter product name">
+              <mat-error *ngIf="productForm.get('name')?.hasError('required')">
+                Product name is required
+              </mat-error>
+              <mat-error *ngIf="productForm.get('name')?.hasError('maxlength')">
+                Product name must be less than 100 characters
+              </mat-error>
+            </mat-form-field>
+          </div>
+          
+          <div class="form-row">
+            <mat-form-field appearance="outline" class="full-width">
+              <mat-label>Description</mat-label>
+              <textarea matInput formControlName="description" placeholder="Enter product description" rows="3"></textarea>
+            </mat-form-field>
+          </div>
+          
+          <div class="form-row two-column">
+            <mat-form-field appearance="outline">
+              <mat-label>SKU</mat-label>
+              <input matInput formControlName="sku" placeholder="Enter SKU">
+            </mat-form-field>
+            
+            <mat-form-field appearance="outline">
+              <mat-label>Barcode</mat-label>
+              <input matInput formControlName="barcode" placeholder="Enter barcode">
+            </mat-form-field>
+          </div>
+          
+          <div class="form-row three-column">
+            <mat-form-field appearance="outline">
+              <mat-label>Category</mat-label>
+              <mat-select formControlName="category">
+                <mat-option value="">-- None --</mat-option>
+                <mat-option *ngFor="let category of categories" [value]="category">
+                  {{ category }}
+                </mat-option>
+                <mat-option value="other">+ Add New</mat-option>
+              </mat-select>
+            </mat-form-field>
+            
+            <mat-form-field appearance="outline">
+              <mat-label>Supplier</mat-label>
+              <mat-select formControlName="supplier">
+                <mat-option value="">-- None --</mat-option>
+                <mat-option *ngFor="let supplier of suppliers" [value]="supplier">
+                  {{ supplier }}
+                </mat-option>
+                <mat-option value="other">+ Add New</mat-option>
+              </mat-select>
+            </mat-form-field>
+            
+            <mat-form-field appearance="outline">
+              <mat-label>Brand</mat-label>
+              <mat-select formControlName="brand">
+                <mat-option value="">-- None --</mat-option>
+                <mat-option *ngFor="let brand of brands" [value]="brand">
+                  {{ brand }}
+                </mat-option>
+                <mat-option value="other">+ Add New</mat-option>
+              </mat-select>
+            </mat-form-field>
+          </div>
+        </mat-card-content>
+      </mat-card>
+      
+      <mat-card class="form-card">
+        <mat-card-header>
+          <mat-card-title>Pricing & Inventory</mat-card-title>
+        </mat-card-header>
+        
+        <mat-card-content>
+          <div class="form-row three-column">
+            <mat-form-field appearance="outline">
+              <mat-label>Purchase Price (₹)</mat-label>
+              <input matInput type="number" formControlName="purchasePrice" placeholder="0.00" min="0" step="0.01">
+              <span matPrefix>₹&nbsp;</span>
+              <mat-error *ngIf="productForm.get('purchasePrice')?.hasError('required')">
+                Purchase price is required
+              </mat-error>
+              <mat-error *ngIf="productForm.get('purchasePrice')?.hasError('min')">
+                Purchase price must be positive
+              </mat-error>
+            </mat-form-field>
+            
+            <mat-form-field appearance="outline">
+              <mat-label>Selling Price (₹)</mat-label>
+              <input matInput type="number" formControlName="sellingPrice" placeholder="0.00" min="0" step="0.01">
+              <span matPrefix>₹&nbsp;</span>
+              <mat-error *ngIf="productForm.get('sellingPrice')?.hasError('required')">
+                Selling price is required
+              </mat-error>
+              <mat-error *ngIf="productForm.get('sellingPrice')?.hasError('min')">
+                Selling price must be positive
+              </mat-error>
+            </mat-form-field>
+            
+            <div class="margin-display">
+              <div class="margin-label">Profit Margin</div>
+              <div class="margin-value">{{ calculateMargin() }}%</div>
+            </div>
+          </div>
+          
+          <div class="form-row three-column">
+            <mat-form-field appearance="outline">
+              <mat-label>Quantity in Stock</mat-label>
+              <input matInput type="number" formControlName="quantity" placeholder="0" min="0" step="1">
+              <mat-error *ngIf="productForm.get('quantity')?.hasError('required')">
+                Quantity is required
+              </mat-error>
+              <mat-error *ngIf="productForm.get('quantity')?.hasError('min')">
+                Quantity must be positive or zero
+              </mat-error>
+            </mat-form-field>
+            
+            <mat-form-field appearance="outline">
+              <mat-label>Reorder Level</mat-label>
+              <input matInput type="number" formControlName="reorderLevel" placeholder="5" min="0" step="1">
+              <mat-hint>Alert will show when stock is below this level</mat-hint>
+              <mat-error *ngIf="productForm.get('reorderLevel')?.hasError('min')">
+                Reorder level must be positive or zero
+              </mat-error>
+            </mat-form-field>
+            
+            <mat-form-field appearance="outline">
+              <mat-label>Expiry Date</mat-label>
+              <input matInput [matDatepicker]="expiryPicker" formControlName="expiryDate">
+              <mat-datepicker-toggle matSuffix [for]="expiryPicker"></mat-datepicker-toggle>
+              <mat-datepicker #expiryPicker></mat-datepicker>
+            </mat-form-field>
+          </div>
+        </mat-card-content>
+      </mat-card>
+      
+      <div class="form-actions">
+        <button mat-button type="button" (click)="onCancel()">Cancel</button>
+        <button mat-raised-button color="primary" type="submit" [disabled]="productForm.invalid || isLoading">
+          <mat-spinner diameter="20" *ngIf="isLoading" class="button-spinner"></mat-spinner>
+          <span *ngIf="!isLoading">{{ isEditMode ? 'Update Product' : 'Save Product' }}</span>
+        </button>
+      </div>
+    </form>
+  </div>
+</div>

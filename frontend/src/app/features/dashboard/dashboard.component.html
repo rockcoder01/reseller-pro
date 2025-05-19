@@ -1,0 +1,224 @@
+<div class="dashboard-container">
+  <div class="dashboard-header">
+    <h1 class="dashboard-title">Dashboard</h1>
+    <div class="period-selector">
+      <mat-form-field appearance="outline">
+        <mat-label>Time Period</mat-label>
+        <mat-select [(ngModel)]="selectedPeriod" (selectionChange)="onPeriodChange()">
+          <mat-option value="daily">Daily</mat-option>
+          <mat-option value="weekly">Weekly</mat-option>
+          <mat-option value="monthly">Monthly</mat-option>
+          <mat-option value="yearly">Yearly</mat-option>
+        </mat-select>
+      </mat-form-field>
+    </div>
+  </div>
+  
+  <div *ngIf="isLoading" class="loading-container">
+    <mat-spinner diameter="40"></mat-spinner>
+    <p>Loading dashboard data...</p>
+  </div>
+  
+  <div *ngIf="!isLoading && summaryData" class="dashboard-content">
+    <!-- Summary Cards -->
+    <div class="summary-cards">
+      <mat-card class="summary-card sales">
+        <mat-card-content>
+          <div class="card-icon">
+            <mat-icon>monetization_on</mat-icon>
+          </div>
+          <div class="card-data">
+            <h3 class="card-title">Today's Sales</h3>
+            <p class="card-value">₹{{ summaryData.totalSalesToday | number:'1.0-0' }}</p>
+          </div>
+        </mat-card-content>
+      </mat-card>
+      
+      <mat-card class="summary-card revenue">
+        <mat-card-content>
+          <div class="card-icon">
+            <mat-icon>account_balance_wallet</mat-icon>
+          </div>
+          <div class="card-data">
+            <h3 class="card-title">Monthly Sales</h3>
+            <p class="card-value">₹{{ summaryData.totalSalesMonth | number:'1.0-0' }}</p>
+          </div>
+        </mat-card-content>
+      </mat-card>
+      
+      <mat-card class="summary-card expenses">
+        <mat-card-content>
+          <div class="card-icon">
+            <mat-icon>trending_down</mat-icon>
+          </div>
+          <div class="card-data">
+            <h3 class="card-title">Monthly Expenses</h3>
+            <p class="card-value">₹{{ summaryData.totalExpensesMonth | number:'1.0-0' }}</p>
+          </div>
+        </mat-card-content>
+      </mat-card>
+      
+      <mat-card class="summary-card profit">
+        <mat-card-content>
+          <div class="card-icon">
+            <mat-icon>trending_up</mat-icon>
+          </div>
+          <div class="card-data">
+            <h3 class="card-title">Net Profit</h3>
+            <p class="card-value">₹{{ summaryData.netProfit | number:'1.0-0' }}</p>
+          </div>
+        </mat-card-content>
+      </mat-card>
+    </div>
+    
+    <!-- Inventory Status and Invoice Status -->
+    <div class="status-cards">
+      <mat-card class="inventory-status">
+        <mat-card-header>
+          <mat-card-title>Inventory Status</mat-card-title>
+        </mat-card-header>
+        <mat-card-content>
+          <div class="status-item">
+            <span class="status-label">Total Products</span>
+            <span class="status-value">{{ summaryData.totalProducts }}</span>
+          </div>
+          <div class="status-item alert">
+            <span class="status-label">Low Stock Items</span>
+            <span class="status-value">{{ summaryData.lowStockCount }}</span>
+          </div>
+          <div class="status-action">
+            <button mat-stroked-button color="primary" routerLink="/inventory/products">
+              View Inventory
+            </button>
+          </div>
+        </mat-card-content>
+      </mat-card>
+      
+      <mat-card class="invoice-status">
+        <mat-card-header>
+          <mat-card-title>Invoice Status</mat-card-title>
+        </mat-card-header>
+        <mat-card-content>
+          <div class="status-item">
+            <span class="status-label">Pending Invoices</span>
+            <span class="status-value">{{ summaryData.pendingInvoicesCount }}</span>
+          </div>
+          <div class="status-action">
+            <button mat-stroked-button color="primary" routerLink="/invoices/list">
+              View Invoices
+            </button>
+            <button mat-stroked-button color="accent" routerLink="/invoices/new">
+              Create Invoice
+            </button>
+          </div>
+        </mat-card-content>
+      </mat-card>
+    </div>
+    
+    <!-- Charts -->
+    <div class="chart-containers">
+      <!-- Sales Chart -->
+      <mat-card class="chart-card sales-chart">
+        <mat-card-header>
+          <mat-card-title>Sales Trend</mat-card-title>
+        </mat-card-header>
+        <mat-card-content>
+          <div class="chart-wrapper">
+            <canvas baseChart
+                    [data]="salesChartData"
+                    [options]="salesChartOptions"
+                    [type]="'line'">
+            </canvas>
+          </div>
+        </mat-card-content>
+      </mat-card>
+      
+      <!-- Expenses by Category -->
+      <mat-card class="chart-card expenses-chart">
+        <mat-card-header>
+          <mat-card-title>Expenses by Category</mat-card-title>
+        </mat-card-header>
+        <mat-card-content>
+          <div class="chart-wrapper donut-wrapper">
+            <canvas baseChart
+                    [data]="expenseChartData"
+                    [options]="expenseChartOptions"
+                    [type]="'doughnut'">
+            </canvas>
+          </div>
+        </mat-card-content>
+      </mat-card>
+    </div>
+    
+    <!-- Top Products and Recent Invoices -->
+    <div class="bottom-section">
+      <!-- Top Selling Products -->
+      <mat-card class="top-products">
+        <mat-card-header>
+          <mat-card-title>Top Selling Products</mat-card-title>
+        </mat-card-header>
+        <mat-card-content>
+          <div class="chart-wrapper">
+            <canvas baseChart
+                    [data]="productsChartData"
+                    [options]="productsChartOptions"
+                    [type]="'bar'">
+            </canvas>
+          </div>
+        </mat-card-content>
+      </mat-card>
+      
+      <!-- Recent Invoices -->
+      <mat-card class="recent-invoices">
+        <mat-card-header>
+          <mat-card-title>Recent Invoices</mat-card-title>
+        </mat-card-header>
+        <mat-card-content>
+          <div class="invoice-list">
+            <table mat-table [dataSource]="summaryData.recentInvoices" class="mat-elevation-z0">
+              <!-- Invoice Number Column -->
+              <ng-container matColumnDef="invoiceNumber">
+                <th mat-header-cell *matHeaderCellDef>Invoice #</th>
+                <td mat-cell *matCellDef="let invoice">{{ invoice.invoiceNumber }}</td>
+              </ng-container>
+              
+              <!-- Customer Name Column -->
+              <ng-container matColumnDef="customerName">
+                <th mat-header-cell *matHeaderCellDef>Customer</th>
+                <td mat-cell *matCellDef="let invoice">{{ invoice.customerName }}</td>
+              </ng-container>
+              
+              <!-- Total Column -->
+              <ng-container matColumnDef="total">
+                <th mat-header-cell *matHeaderCellDef>Amount</th>
+                <td mat-cell *matCellDef="let invoice" class="amount-cell">₹{{ invoice.total | number:'1.0-0' }}</td>
+              </ng-container>
+              
+              <!-- Status Column -->
+              <ng-container matColumnDef="status">
+                <th mat-header-cell *matHeaderCellDef>Status</th>
+                <td mat-cell *matCellDef="let invoice">
+                  <span class="status-badge" [ngClass]="invoice.paymentStatus">
+                    {{ invoice.paymentStatus }}
+                  </span>
+                </td>
+              </ng-container>
+              
+              <tr mat-header-row *matHeaderRowDef="['invoiceNumber', 'customerName', 'total', 'status']"></tr>
+              <tr mat-row *matRowDef="let row; columns: ['invoiceNumber', 'customerName', 'total', 'status']"
+                  [routerLink]="['/invoices', row.id]"></tr>
+            </table>
+            
+            <div *ngIf="summaryData.recentInvoices.length === 0" class="no-data">
+              No recent invoices found.
+            </div>
+            
+            <div class="view-all-link">
+              <a mat-button color="primary" routerLink="/invoices/list">View All Invoices</a>
+            </div>
+          </div>
+        </mat-card-content>
+      </mat-card>
+    </div>
+  </div>
+</div>
