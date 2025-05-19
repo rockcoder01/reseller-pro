@@ -4,10 +4,10 @@ const authController = require('../controllers/auth.controller');
 const { verifyToken } = require('../middleware/auth.jwt');
 
 // Register a new user
-router.post('/register', authController.register);
+router.post('/signup', authController.register);
 
 // Login
-router.post('/login', authController.login);
+router.post('/signin', authController.login);
 
 // Update profile (requires authentication)
 router.put('/profile', verifyToken, authController.updateProfile);
