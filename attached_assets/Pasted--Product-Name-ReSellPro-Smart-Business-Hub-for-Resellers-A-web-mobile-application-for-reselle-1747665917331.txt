@@ -1,0 +1,126 @@
+🧾 Product Name: ReSellPro – Smart Business Hub for Resellers
+A web + mobile application for resellers that manages their full business cycle — from inventory and invoice creation to employee salary, returns, refunds, margins, and reports. Built with Angular (Frontend) + Node.js (Backend) and optional React Native for mobile.
+
+🎯 Target Users
+Resellers (local stores, online sellers)
+
+Mobile shop owners
+
+FMCG distributors
+
+Apparel & electronics sellers
+
+ReCommerce vendors (used goods sellers)
+
+🧠 Core Modules & Features
+🧩 1. Inventory Management
+Add/update products with stock quantity, price, and expiry
+
+Barcode scanner support
+
+Auto low-stock alerts
+
+Categorized by supplier/brand
+
+Track damaged/lost stock
+
+🧾 2. Invoice & Billing
+Create & print invoices (PDF)
+
+GST/tax options
+
+Auto-margin calculation
+
+Customer & order history
+
+Split payments / credit payments
+
+📉 3. Margin & Profit Tracking
+Product-level margin setup
+
+View per-invoice profit
+
+Daily/weekly/monthly profit reports
+
+Discounts & return impact on margin
+
+👨‍🔧 4. Labor & Salary Management
+Add employees with daily/monthly pay mode
+
+Track working days/hours
+
+Advance salary, loan, overtime
+
+Monthly salary payout reports
+
+Attendance tracker (QR code or manual)
+
+🔁 5. Returns & Refund Management
+Create return slip (with reason)
+
+Track returned inventory
+
+Refund with invoice link
+
+Adjust margin/profit after return
+
+💰 6. Expense Tracking
+Add categories: rent, electricity, petrol, packaging
+
+Recurring or one-time expenses
+
+Auto deduct from net margin
+
+Visual expense breakdowns (Pie charts)
+
+📊 7. Reports & Dashboard
+Live dashboard: Today’s Sale, Expenses, Profit
+
+Downloadable reports: Inventory, Sales, Staff Pay
+
+Export as Excel/PDF
+
+WhatsApp/email daily reports
+
+💻 Tech Stack
+Layer	Tech
+Frontend	Angular
+Backend	Node.js + Express
+DB	MongoDB or PostgreSQL
+Auth	Firebase Auth / JWT
+Mobile App	React Native (optional)
+Hosting	Vercel (FE) + Render/Heroku (BE)
+PDF Gen	pdf-lib or Puppeteer
+File Store	Firebase Storage or S3
+
+💸 Monetization Model
+💼 SaaS Subscriptions:
+Plan	Price	Features
+Basic	₹299/month	Inventory + Invoicing
+Pro	₹699/month	All features + Staff mgmt
+Enterprise	Custom	Multi-branch, Analytics, Support
+
+🎁 Free Tier:
+Limited inventory items (50)
+
+Up to 2 staff
+
+Watermarked invoices
+
+Add-ons:
+WhatsApp daily reports: ₹99/month
+
+Branded invoices: ₹49/month
+
+Mobile app: ₹149/month extra
+
+🔧 Bonus Features (High Demand)
+Multi-language UI (English, Hindi, Gujarati)
+
+Voice input for adding expenses
+
+Offline mode (PWA support)
+
+WhatsApp invoice sharing
+
+Customer credit tracking
