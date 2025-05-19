@@ -125,7 +125,7 @@
     <!-- Top Navigation -->
     <nav class="navbar navbar-expand-lg navbar-dark sticky-top">
         <div class="container-fluid">
-            <a class="navbar-brand" href="#">ReSellPro</a>
+            <a class="navbar-brand" href="#" data-i18n="app_name">ReSellPro</a>
             <button class="navbar-toggler" type="button" id="sidebarToggle">
                 <span class="navbar-toggler-icon"></span>
             </button>
@@ -177,37 +177,37 @@
         <ul class="nav flex-column mt-4">
             <li class="nav-item">
                 <a class="nav-link active" href="dashboard.html">
-                    <i class="bi bi-speedometer2"></i> Dashboard
+                    <i class="bi bi-speedometer2"></i> <span data-i18n="dashboard">Dashboard</span>
                 </a>
             </li>
             <li class="nav-item">
                 <a class="nav-link" href="inventory.html">
-                    <i class="bi bi-box-seam"></i> Inventory
+                    <i class="bi bi-box-seam"></i> <span data-i18n="inventory">Inventory</span>
                 </a>
             </li>
             <li class="nav-item">
                 <a class="nav-link" href="invoice.html">
-                    <i class="bi bi-receipt"></i> Invoices
+                    <i class="bi bi-receipt"></i> <span data-i18n="invoices">Invoices</span>
                 </a>
             </li>
             <li class="nav-item">
                 <a class="nav-link" href="expenses.html">
-                    <i class="bi bi-currency-rupee"></i> Expenses
+                    <i class="bi bi-currency-rupee"></i> <span data-i18n="expenses">Expenses</span>
                 </a>
             </li>
             <li class="nav-item">
                 <a class="nav-link" href="employees.html">
-                    <i class="bi bi-people"></i> Employees
+                    <i class="bi bi-people"></i> <span data-i18n="employees">Employees</span>
                 </a>
             </li>
             <li class="nav-item">
                 <a class="nav-link" href="reports.html">
-                    <i class="bi bi-bar-chart"></i> Reports
+                    <i class="bi bi-bar-chart"></i> <span data-i18n="reports">Reports</span>
                 </a>
             </li>
             <li class="nav-item">
                 <a class="nav-link" href="#">
-                    <i class="bi bi-gear"></i> Settings
+                    <i class="bi bi-gear"></i> <span data-i18n="settings">Settings</span>
                 </a>
             </li>
         </ul>
@@ -216,12 +216,12 @@
     <!-- Main Content -->
     <div class="main-content">
         <div class="d-flex justify-content-between align-items-center mb-4">
-            <h2>Dashboard</h2>
+            <h2 data-i18n="dashboard">Dashboard</h2>
             <div class="btn-group">
-                <button type="button" class="btn btn-outline-secondary">Today</button>
-                <button type="button" class="btn btn-outline-secondary">Week</button>
-                <button type="button" class="btn btn-outline-secondary active">Month</button>
-                <button type="button" class="btn btn-outline-secondary">Year</button>
+                <button type="button" class="btn btn-outline-secondary" data-i18n="daily">Today</button>
+                <button type="button" class="btn btn-outline-secondary" data-i18n="weekly">Week</button>
+                <button type="button" class="btn btn-outline-secondary active" data-i18n="monthly">Month</button>
+                <button type="button" class="btn btn-outline-secondary" data-i18n="yearly">Year</button>
             </div>
         </div>
 
@@ -232,9 +232,9 @@
                     <div class="card-body">
                         <div class="d-flex justify-content-between">
                             <div>
-                                <h6 class="card-subtitle mb-2 text-muted">Total Sales</h6>
+                                <h6 class="card-subtitle mb-2 text-muted" data-i18n="total_sales">Total Sales</h6>
                                 <h3 class="card-title mb-0">₹45,600</h3>
-                                <small class="text-success"><i class="bi bi-arrow-up"></i> 12% from last month</small>
+                                <small class="text-success"><i class="bi bi-arrow-up"></i> <span>12% </span><span data-i18n="from_last_month">from last month</span></small>
                             </div>
                             <div class="stat-icon">
                                 <i class="bi bi-currency-rupee"></i>
@@ -248,9 +248,9 @@
                     <div class="card-body">
                         <div class="d-flex justify-content-between">
                             <div>
-                                <h6 class="card-subtitle mb-2 text-muted">Total Orders</h6>
+                                <h6 class="card-subtitle mb-2 text-muted" data-i18n="total_invoices">Total Orders</h6>
                                 <h3 class="card-title mb-0">24</h3>
-                                <small class="text-success"><i class="bi bi-arrow-up"></i> 5% from last month</small>
+                                <small class="text-success"><i class="bi bi-arrow-up"></i> <span>5% </span><span data-i18n="from_last_month">from last month</span></small>
                             </div>
                             <div class="stat-icon">
                                 <i class="bi bi-bag"></i>
@@ -264,9 +264,9 @@
                     <div class="card-body">
                         <div class="d-flex justify-content-between">
                             <div>
-                                <h6 class="card-subtitle mb-2 text-muted">Total Expenses</h6>
+                                <h6 class="card-subtitle mb-2 text-muted" data-i18n="total_expenses">Total Expenses</h6>
                                 <h3 class="card-title mb-0">₹12,500</h3>
-                                <small class="text-danger"><i class="bi bi-arrow-up"></i> 8% from last month</small>
+                                <small class="text-danger"><i class="bi bi-arrow-up"></i> <span>8% </span><span data-i18n="from_last_month">from last month</span></small>
                             </div>
                             <div class="stat-icon">
                                 <i class="bi bi-cash-stack"></i>
@@ -425,6 +425,21 @@
     <script src="js/translations.js"></script>
     <script src="js/language-switcher.js"></script>
     <script>
+        // Initialize custom language switcher behavior when the page loads
+        document.addEventListener('DOMContentLoaded', function() {
+            // Set up click handlers for language options
+            document.querySelectorAll('.language-option').forEach(option => {
+                option.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    const lang = this.getAttribute('data-lang');
+                    window.i18n.changeLanguage(lang);
+                    
+                    // Update HTML lang attribute
+                    document.documentElement.setAttribute('lang', lang);
+                    document.documentElement.setAttribute('data-lang', lang);
+                });
+            });
+        });
         document.addEventListener('DOMContentLoaded', function() {
             // Check if user is logged in
             const token = localStorage.getItem('token');
