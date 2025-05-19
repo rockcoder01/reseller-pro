@@ -1,0 +1,1669 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Invoices - ReSellPro</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f8f9fa;
+        }
+        .navbar {
+            background-color: #343a40;
+        }
+        .navbar-brand {
+            font-weight: bold;
+            color: #ffffff;
+        }
+        .sidebar {
+            position: fixed;
+            top: 56px;
+            bottom: 0;
+            left: 0;
+            z-index: 100;
+            padding: 0;
+            box-shadow: inset -1px 0 0 rgba(0, 0, 0, .1);
+            background-color: #fff;
+            width: 250px;
+            transition: all 0.3s;
+        }
+        .sidebar .nav-link {
+            color: #333;
+            padding: 12px 20px;
+            margin-bottom: 5px;
+            border-radius: 0;
+            transition: all 0.3s;
+        }
+        .sidebar .nav-link:hover, .sidebar .nav-link.active {
+            color: #4a6bdf;
+            background-color: #f8f9fa;
+            border-left: 3px solid #4a6bdf;
+            padding-left: 17px;
+        }
+        .sidebar .nav-link i {
+            margin-right: 10px;
+            width: 20px;
+            text-align: center;
+        }
+        .main-content {
+            margin-left: 250px;
+            padding: 20px;
+            transition: all 0.3s;
+        }
+        @media (max-width: 768px) {
+            .sidebar {
+                margin-left: -250px;
+            }
+            .sidebar.active {
+                margin-left: 0;
+            }
+            .main-content {
+                margin-left: 0;
+            }
+            .main-content.active {
+                margin-left: 250px;
+            }
+        }
+        .card {
+            border-radius: 10px;
+            border: none;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+            margin-bottom: 20px;
+        }
+        .btn-primary {
+            background-color: #4a6bdf;
+            border-color: #4a6bdf;
+        }
+        .btn-primary:hover {
+            background-color: #3a5ac7;
+            border-color: #3a5ac7;
+        }
+        .table-responsive {
+            border-radius: 10px;
+            overflow: hidden;
+        }
+        .avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background-color: #4a6bdf;
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 16px;
+        }
+        .dropdown-toggle::after {
+            display: none;
+        }
+        .badge-status {
+            padding: 5px 10px;
+            border-radius: 20px;
+            font-weight: 500;
+        }
+        .badge-paid {
+            background-color: #e3fcef;
+            color: #00a854;
+        }
+        .badge-partial {
+            background-color: #fff3e0;
+            color: #fa8c16;
+        }
+        .badge-unpaid {
+            background-color: #ffebee;
+            color: #f5222d;
+        }
+        .filter-card {
+            border-radius: 10px;
+            border: none;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+            margin-bottom: 20px;
+        }
+        #invoiceForm {
+            display: none;
+        }
+        .invoice-preview {
+            background-color: #fff;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+        }
+        .invoice-header {
+            padding-bottom: 20px;
+            border-bottom: 1px solid #eee;
+        }
+        .invoice-details {
+            margin-top: 20px;
+            margin-bottom: 20px;
+        }
+        .invoice-table th {
+            background-color: #f8f9fa;
+        }
+        .invoice-total {
+            padding-top: 20px;
+            border-top: 1px solid #eee;
+        }
+        .customer-search {
+            position: relative;
+        }
+        .search-results {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            right: 0;
+            background-color: #fff;
+            border: 1px solid #ddd;
+            border-radius: 0 0 5px 5px;
+            box-shadow: 0 5px 10px rgba(0,0,0,0.1);
+            max-height: 200px;
+            overflow-y: auto;
+            z-index: 100;
+            display: none;
+        }
+        .search-result-item {
+            padding: 10px 15px;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+        .search-result-item:hover {
+            background-color: #f8f9fa;
+        }
+        .product-search {
+            position: relative;
+        }
+        #invoiceAlert {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <!-- Top Navigation -->
+    <nav class="navbar navbar-expand-lg navbar-dark sticky-top">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="#">ReSellPro</a>
+            <button class="navbar-toggler" type="button" id="sidebarToggle">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <form class="d-flex ms-auto me-3">
+                    <div class="input-group">
+                        <input class="form-control" type="search" placeholder="Search" aria-label="Search">
+                        <button class="btn btn-outline-light" type="submit"><i class="bi bi-search"></i></button>
+                    </div>
+                </form>
+                
+                <ul class="navbar-nav">
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" id="notificationsDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                            <i class="bi bi-bell"></i>
+                            <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
+                                3
+                            </span>
+                        </a>
+                        <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="notificationsDropdown">
+                            <li><h6 class="dropdown-header">Notifications</h6></li>
+                            <li><a class="dropdown-item" href="#">Low stock alert: 5 products</a></li>
+                            <li><a class="dropdown-item" href="#">New order received: INV-1001</a></li>
+                            <li><a class="dropdown-item" href="#">Payment received: ₹15,000</a></li>
+                            <li><hr class="dropdown-divider"></li>
+                            <li><a class="dropdown-item text-primary" href="#">View all notifications</a></li>
+                        </ul>
+                    </li>
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle d-flex align-items-center" href="#" id="userDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                            <div class="avatar me-2" id="userAvatar">JS</div>
+                            <span id="userName">User</span>
+                        </a>
+                        <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="userDropdown">
+                            <li><a class="dropdown-item" href="profile.html"><i class="bi bi-person me-2"></i>Profile</a></li>
+                            <li><a class="dropdown-item" href="#"><i class="bi bi-gear me-2"></i>Settings</a></li>
+                            <li><hr class="dropdown-divider"></li>
+                            <li><a class="dropdown-item" href="#" id="logoutButton"><i class="bi bi-box-arrow-right me-2"></i>Logout</a></li>
+                        </ul>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Sidebar -->
+    <div class="sidebar">
+        <ul class="nav flex-column mt-4">
+            <li class="nav-item">
+                <a class="nav-link" href="dashboard.html">
+                    <i class="bi bi-speedometer2"></i> Dashboard
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="inventory.html">
+                    <i class="bi bi-box-seam"></i> Inventory
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link active" href="invoice.html">
+                    <i class="bi bi-receipt"></i> Invoices
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="#">
+                    <i class="bi bi-currency-rupee"></i> Expenses
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="#">
+                    <i class="bi bi-people"></i> Employees
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="reports.html">
+                    <i class="bi bi-bar-chart"></i> Reports
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="#">
+                    <i class="bi bi-gear"></i> Settings
+                </a>
+            </li>
+        </ul>
+    </div>
+
+    <!-- Main Content -->
+    <div class="main-content">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h2>Invoices</h2>
+            <button id="createInvoiceBtn" class="btn btn-primary">
+                <i class="bi bi-plus-circle"></i> Create New Invoice
+            </button>
+        </div>
+        
+        <div class="alert alert-success" id="invoiceAlert" role="alert">
+            Invoice saved successfully!
+        </div>
+        
+        <!-- Invoice Form Card -->
+        <div class="card mb-4" id="invoiceForm">
+            <div class="card-header bg-primary text-white">
+                <h5 class="mb-0" id="formTitle">Create New Invoice</h5>
+            </div>
+            <div class="card-body">
+                <form id="invoiceDetailsForm">
+                    <input type="hidden" id="invoiceId">
+                    
+                    <!-- Customer Information -->
+                    <div class="row mb-4">
+                        <div class="col-md-12">
+                            <h5>Customer Information</h5>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3 customer-search">
+                                <label for="customerName" class="form-label">Customer Name*</label>
+                                <input type="text" class="form-control" id="customerName" placeholder="Search customer or enter new name" required>
+                                <div class="search-results" id="customerSearchResults">
+                                    <!-- Search results will be populated here -->
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="customerEmail" class="form-label">Email</label>
+                                <input type="email" class="form-control" id="customerEmail" placeholder="customer@example.com">
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="customerPhone" class="form-label">Phone</label>
+                                <input type="tel" class="form-control" id="customerPhone" placeholder="Enter phone number">
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="customerAddress" class="form-label">Address</label>
+                                <textarea class="form-control" id="customerAddress" rows="2" placeholder="Enter address"></textarea>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Invoice Items -->
+                    <div class="row mb-4">
+                        <div class="col-md-12">
+                            <h5>Invoice Items</h5>
+                            <div class="table-responsive">
+                                <table class="table table-bordered" id="invoiceItemsTable">
+                                    <thead>
+                                        <tr>
+                                            <th style="width: 35%;">Product</th>
+                                            <th style="width: 15%;">Unit Price</th>
+                                            <th style="width: 15%;">Quantity</th>
+                                            <th style="width: 15%;">Discount</th>
+                                            <th style="width: 15%;">Total</th>
+                                            <th style="width: 5%;">Action</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="invoiceItemsBody">
+                                        <!-- Invoice items will be added here -->
+                                    </tbody>
+                                </table>
+                            </div>
+                            <button type="button" class="btn btn-outline-primary mt-2" id="addItemBtn">
+                                <i class="bi bi-plus-circle"></i> Add Item
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <!-- Totals and Payment -->
+                    <div class="row mb-4">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="notes" class="form-label">Notes</label>
+                                <textarea class="form-control" id="notes" rows="4" placeholder="Add notes or terms and conditions"></textarea>
+                            </div>
+                            <div class="mb-3">
+                                <label for="paymentStatus" class="form-label">Payment Status</label>
+                                <select class="form-select" id="paymentStatus">
+                                    <option value="unpaid">Unpaid</option>
+                                    <option value="partial">Partially Paid</option>
+                                    <option value="paid">Paid</option>
+                                </select>
+                            </div>
+                            <div class="mb-3">
+                                <label for="paymentMethod" class="form-label">Payment Method</label>
+                                <select class="form-select" id="paymentMethod">
+                                    <option value="">Select Payment Method</option>
+                                    <option value="cash">Cash</option>
+                                    <option value="card">Card</option>
+                                    <option value="upi">UPI</option>
+                                    <option value="bank">Bank Transfer</option>
+                                    <option value="cheque">Cheque</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="card">
+                                <div class="card-body">
+                                    <h5 class="card-title">Invoice Summary</h5>
+                                    <div class="d-flex justify-content-between mb-2">
+                                        <span>Subtotal:</span>
+                                        <span id="subtotalAmount">₹0.00</span>
+                                    </div>
+                                    <div class="d-flex justify-content-between mb-2">
+                                        <span>Discount:</span>
+                                        <span id="discountAmount">-₹0.00</span>
+                                    </div>
+                                    <div class="d-flex justify-content-between mb-2">
+                                        <span>Tax (GST):</span>
+                                        <div>
+                                            <input type="number" class="form-control form-control-sm" id="taxPercentage" min="0" max="100" step="0.1" value="18" style="width: 70px; display: inline-block;"> %
+                                            <span id="taxAmount" class="ms-2">₹0.00</span>
+                                        </div>
+                                    </div>
+                                    <hr>
+                                    <div class="d-flex justify-content-between">
+                                        <strong>Total:</strong>
+                                        <strong id="totalAmount">₹0.00</strong>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="d-flex justify-content-end">
+                        <button type="button" class="btn btn-secondary me-2" id="cancelInvoiceBtn">Cancel</button>
+                        <button type="submit" class="btn btn-primary me-2">Save Invoice</button>
+                        <button type="button" class="btn btn-outline-primary" id="previewInvoiceBtn">Preview</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+        
+        <!-- Filter Card -->
+        <div class="card filter-card">
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-4">
+                        <div class="input-group">
+                            <input type="text" class="form-control" placeholder="Search invoices by number or customer" id="searchInput">
+                            <button class="btn btn-outline-secondary" type="button" id="searchBtn">
+                                <i class="bi bi-search"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <select class="form-select" id="statusFilter">
+                            <option value="">All Status</option>
+                            <option value="paid">Paid</option>
+                            <option value="partial">Partially Paid</option>
+                            <option value="unpaid">Unpaid</option>
+                        </select>
+                    </div>
+                    <div class="col-md-2">
+                        <input type="date" class="form-control" id="startDateFilter" placeholder="Start Date">
+                    </div>
+                    <div class="col-md-2">
+                        <input type="date" class="form-control" id="endDateFilter" placeholder="End Date">
+                    </div>
+                    <div class="col-md-1">
+                        <button class="btn btn-outline-secondary w-100" id="resetFilterBtn">
+                            <i class="bi bi-x-circle"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Invoices Table Card -->
+        <div class="card">
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-hover" id="invoicesTable">
+                        <thead>
+                            <tr>
+                                <th>Invoice #</th>
+                                <th>Customer</th>
+                                <th>Date</th>
+                                <th>Amount</th>
+                                <th>Status</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="invoicesTableBody">
+                            <!-- Table rows will be added dynamically -->
+                        </tbody>
+                    </table>
+                </div>
+                <div class="text-center" id="noInvoicesMessage" style="display: none;">
+                    <p class="text-muted my-5">No invoices found. Create a new invoice to get started.</p>
+                </div>
+                <div class="text-center" id="loadingInvoices">
+                    <div class="spinner-border text-primary my-5" role="status">
+                        <span class="visually-hidden">Loading...</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Product Search Modal -->
+    <div class="modal fade" id="productSearchModal" tabindex="-1" aria-labelledby="productSearchModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="productSearchModalLabel">Select Product</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="input-group mb-3">
+                        <input type="text" class="form-control" placeholder="Search by product name, SKU, or barcode" id="productSearchInput">
+                        <button class="btn btn-outline-secondary" type="button" id="searchProductBtn">
+                            <i class="bi bi-search"></i> Search
+                        </button>
+                    </div>
+                    <div class="table-responsive">
+                        <table class="table table-hover" id="productSearchTable">
+                            <thead>
+                                <tr>
+                                    <th>Product</th>
+                                    <th>SKU</th>
+                                    <th>Price</th>
+                                    <th>In Stock</th>
+                                    <th>Action</th>
+                                </tr>
+                            </thead>
+                            <tbody id="productSearchResults">
+                                <!-- Product search results will be added here -->
+                            </tbody>
+                        </table>
+                    </div>
+                    <div class="text-center" id="noProductsFoundMessage" style="display: none;">
+                        <p class="text-muted my-3">No products found. Try a different search.</p>
+                    </div>
+                    <div class="text-center" id="loadingProducts">
+                        <div class="spinner-border text-primary my-3" role="status">
+                            <span class="visually-hidden">Loading...</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Invoice Preview Modal -->
+    <div class="modal fade" id="invoicePreviewModal" tabindex="-1" aria-labelledby="invoicePreviewModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="invoicePreviewModalLabel">Invoice Preview</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="invoice-preview" id="invoicePreview">
+                        <!-- Invoice preview content will be generated here -->
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    <button type="button" class="btn btn-primary" id="downloadPdfBtn">
+                        <i class="bi bi-file-pdf"></i> Download PDF
+                    </button>
+                    <button type="button" class="btn btn-success" id="sendEmailBtn">
+                        <i class="bi bi-envelope"></i> Send by Email
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Delete Confirmation Modal -->
+    <div class="modal fade" id="deleteModal" tabindex="-1" aria-labelledby="deleteModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="deleteModalLabel">Confirm Delete</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    Are you sure you want to delete this invoice? This action cannot be undone.
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-danger" id="confirmDeleteBtn">Delete</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Send Email Modal -->
+    <div class="modal fade" id="sendEmailModal" tabindex="-1" aria-labelledby="sendEmailModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="sendEmailModalLabel">Send Invoice by Email</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="sendEmailForm">
+                        <div class="mb-3">
+                            <label for="emailTo" class="form-label">To</label>
+                            <input type="email" class="form-control" id="emailTo" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="emailSubject" class="form-label">Subject</label>
+                            <input type="text" class="form-control" id="emailSubject" value="Invoice from ReSellPro" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="emailMessage" class="form-label">Message</label>
+                            <textarea class="form-control" id="emailMessage" rows="4">Dear Customer,
+
+Please find attached the invoice for your recent purchase.
+
+Thank you for your business!
+
+Regards,
+ReSellPro Team</textarea>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-primary" id="confirmSendEmailBtn">Send Email</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // API URL
+            const apiUrl = 'http://localhost:3000/api';
+            
+            // Check if user is logged in
+            const token = localStorage.getItem('token');
+            const user = JSON.parse(localStorage.getItem('user') || '{}');
+            
+            if (!token) {
+                // Redirect to login if not logged in
+                window.location.href = 'login.html';
+                return;
+            }
+            
+            // Set user display name and avatar
+            const userNameElement = document.getElementById('userName');
+            const userAvatarElement = document.getElementById('userAvatar');
+            
+            if (user.firstName && user.lastName) {
+                userNameElement.textContent = `${user.firstName} ${user.lastName}`;
+                userAvatarElement.textContent = `${user.firstName.charAt(0)}${user.lastName.charAt(0)}`;
+            } else if (user.username) {
+                userNameElement.textContent = user.username;
+                userAvatarElement.textContent = user.username.substring(0, 2).toUpperCase();
+            }
+            
+            // DOM Elements
+            const invoicesTableBody = document.getElementById('invoicesTableBody');
+            const invoiceForm = document.getElementById('invoiceForm');
+            const invoiceDetailsForm = document.getElementById('invoiceDetailsForm');
+            const formTitle = document.getElementById('formTitle');
+            const createInvoiceBtn = document.getElementById('createInvoiceBtn');
+            const cancelInvoiceBtn = document.getElementById('cancelInvoiceBtn');
+            const invoiceItemsBody = document.getElementById('invoiceItemsBody');
+            const addItemBtn = document.getElementById('addItemBtn');
+            const searchInput = document.getElementById('searchInput');
+            const searchBtn = document.getElementById('searchBtn');
+            const statusFilter = document.getElementById('statusFilter');
+            const startDateFilter = document.getElementById('startDateFilter');
+            const endDateFilter = document.getElementById('endDateFilter');
+            const resetFilterBtn = document.getElementById('resetFilterBtn');
+            const loadingInvoices = document.getElementById('loadingInvoices');
+            const noInvoicesMessage = document.getElementById('noInvoicesMessage');
+            const invoiceAlert = document.getElementById('invoiceAlert');
+            const deleteModal = new bootstrap.Modal(document.getElementById('deleteModal'));
+            const confirmDeleteBtn = document.getElementById('confirmDeleteBtn');
+            
+            // Product search modal
+            const productSearchModal = new bootstrap.Modal(document.getElementById('productSearchModal'));
+            const productSearchInput = document.getElementById('productSearchInput');
+            const searchProductBtn = document.getElementById('searchProductBtn');
+            const productSearchResults = document.getElementById('productSearchResults');
+            const noProductsFoundMessage = document.getElementById('noProductsFoundMessage');
+            const loadingProducts = document.getElementById('loadingProducts');
+            
+            // Invoice preview elements
+            const previewInvoiceBtn = document.getElementById('previewInvoiceBtn');
+            const invoicePreviewModal = new bootstrap.Modal(document.getElementById('invoicePreviewModal'));
+            const invoicePreview = document.getElementById('invoicePreview');
+            const downloadPdfBtn = document.getElementById('downloadPdfBtn');
+            
+            // Email modal elements
+            const sendEmailBtn = document.getElementById('sendEmailBtn');
+            const sendEmailModal = new bootstrap.Modal(document.getElementById('sendEmailModal'));
+            const emailTo = document.getElementById('emailTo');
+            const confirmSendEmailBtn = document.getElementById('confirmSendEmailBtn');
+            
+            // Current invoice ID for editing or deletion
+            let currentInvoiceId = null;
+            
+            // Current row being edited in items table
+            let currentItemRow = null;
+            
+            // Products cache for quick access
+            let productsCache = {};
+            
+            // Totals calculation variables
+            let subtotal = 0;
+            let discount = 0;
+            let taxRate = 0.18; // 18% default tax rate
+            let total = 0;
+            
+            // Logout functionality
+            document.getElementById('logoutButton').addEventListener('click', function(e) {
+                e.preventDefault();
+                localStorage.removeItem('token');
+                localStorage.removeItem('user');
+                window.location.href = 'login.html';
+            });
+            
+            // Toggle sidebar on mobile
+            document.getElementById('sidebarToggle').addEventListener('click', function() {
+                document.querySelector('.sidebar').classList.toggle('active');
+                document.querySelector('.main-content').classList.toggle('active');
+            });
+            
+            // Show/hide invoice form
+            createInvoiceBtn.addEventListener('click', function() {
+                resetForm();
+                formTitle.textContent = 'Create New Invoice';
+                // Generate a new invoice number
+                generateInvoiceNumber();
+                invoiceForm.style.display = 'block';
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+            });
+            
+            cancelInvoiceBtn.addEventListener('click', function() {
+                invoiceForm.style.display = 'none';
+            });
+            
+            // Add new item row
+            addItemBtn.addEventListener('click', function() {
+                addItemRow();
+            });
+            
+            // Handle tax percentage changes
+            document.getElementById('taxPercentage').addEventListener('input', function() {
+                taxRate = parseFloat(this.value) / 100;
+                updateTotals();
+            });
+            
+            // Form submission
+            invoiceDetailsForm.addEventListener('submit', function(e) {
+                e.preventDefault();
+                
+                // Check if there are any items
+                if (invoiceItemsBody.children.length === 0) {
+                    alert('Please add at least one item to the invoice.');
+                    return;
+                }
+                
+                // Get form data
+                const invoiceData = {
+                    customerName: document.getElementById('customerName').value,
+                    customerEmail: document.getElementById('customerEmail').value,
+                    customerPhone: document.getElementById('customerPhone').value,
+                    customerAddress: document.getElementById('customerAddress').value,
+                    subtotal: subtotal,
+                    taxAmount: subtotal * taxRate,
+                    discountAmount: discount,
+                    total: total,
+                    paymentStatus: document.getElementById('paymentStatus').value,
+                    paymentMethod: document.getElementById('paymentMethod').value,
+                    notes: document.getElementById('notes').value,
+                    items: []
+                };
+                
+                // Get all items from the table
+                const rows = invoiceItemsBody.querySelectorAll('tr');
+                rows.forEach(row => {
+                    const productId = row.dataset.productId;
+                    const productName = row.querySelector('.product-name').textContent;
+                    const unitPrice = parseFloat(row.querySelector('.unit-price').textContent.replace('₹', ''));
+                    const quantity = parseInt(row.querySelector('.quantity-input').value);
+                    const discountPercent = parseFloat(row.querySelector('.discount-input').value) || 0;
+                    const rowTotal = parseFloat(row.querySelector('.row-total').textContent.replace('₹', ''));
+                    
+                    invoiceData.items.push({
+                        productId: productId || null,
+                        productName,
+                        unitPrice,
+                        quantity,
+                        discount: discountPercent,
+                        total: rowTotal
+                    });
+                });
+                
+                // Determine if we're editing or creating new
+                const isEditing = currentInvoiceId !== null;
+                const method = isEditing ? 'PUT' : 'POST';
+                const url = isEditing ? `${apiUrl}/invoices/${currentInvoiceId}` : `${apiUrl}/invoices`;
+                
+                // Save invoice
+                fetch(url, {
+                    method: method,
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'x-access-token': token
+                    },
+                    body: JSON.stringify(invoiceData)
+                })
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Failed to save invoice');
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    // Show success message
+                    invoiceAlert.textContent = isEditing ? 'Invoice updated successfully!' : 'Invoice created successfully!';
+                    invoiceAlert.className = 'alert alert-success';
+                    invoiceAlert.style.display = 'block';
+                    
+                    // Reset form and hide it
+                    resetForm();
+                    invoiceForm.style.display = 'none';
+                    
+                    // Reload invoices
+                    loadInvoices();
+                    
+                    // Store the ID for potential PDF download
+                    currentInvoiceId = data.id;
+                    
+                    // Hide alert after 3 seconds
+                    setTimeout(() => {
+                        invoiceAlert.style.display = 'none';
+                    }, 3000);
+                })
+                .catch(error => {
+                    console.error('Error saving invoice:', error);
+                    
+                    // Show error message
+                    invoiceAlert.textContent = 'Error saving invoice: ' + error.message;
+                    invoiceAlert.className = 'alert alert-danger';
+                    invoiceAlert.style.display = 'block';
+                    
+                    // Hide alert after 3 seconds
+                    setTimeout(() => {
+                        invoiceAlert.style.display = 'none';
+                    }, 3000);
+                });
+            });
+            
+            // Add item row to invoice
+            function addItemRow(item = null) {
+                const row = document.createElement('tr');
+                
+                // Set dataset and values if an item is provided
+                if (item) {
+                    row.dataset.productId = item.productId || '';
+                }
+                
+                row.innerHTML = `
+                    <td>
+                        <div class="d-flex align-items-center">
+                            <button type="button" class="btn btn-sm btn-outline-primary select-product-btn me-2">
+                                <i class="bi bi-search"></i>
+                            </button>
+                            <span class="product-name">${item ? item.productName : 'Select a product'}</span>
+                        </div>
+                    </td>
+                    <td class="unit-price">${item ? '₹' + item.unitPrice.toFixed(2) : '₹0.00'}</td>
+                    <td>
+                        <input type="number" class="form-control form-control-sm quantity-input" min="1" value="${item ? item.quantity : 1}" required>
+                    </td>
+                    <td>
+                        <div class="input-group input-group-sm">
+                            <input type="number" class="form-control form-control-sm discount-input" min="0" max="100" value="${item ? item.discount : '0'}">
+                            <span class="input-group-text">%</span>
+                        </div>
+                    </td>
+                    <td class="row-total">${item ? '₹' + item.total.toFixed(2) : '₹0.00'}</td>
+                    <td>
+                        <button type="button" class="btn btn-sm btn-outline-danger remove-item-btn">
+                            <i class="bi bi-trash"></i>
+                        </button>
+                    </td>
+                `;
+                
+                // Add event listeners to the row controls
+                const selectProductBtn = row.querySelector('.select-product-btn');
+                const quantityInput = row.querySelector('.quantity-input');
+                const discountInput = row.querySelector('.discount-input');
+                const removeItemBtn = row.querySelector('.remove-item-btn');
+                
+                selectProductBtn.addEventListener('click', function() {
+                    openProductSearch(row);
+                });
+                
+                quantityInput.addEventListener('input', function() {
+                    updateRowTotal(row);
+                });
+                
+                discountInput.addEventListener('input', function() {
+                    updateRowTotal(row);
+                });
+                
+                removeItemBtn.addEventListener('click', function() {
+                    row.remove();
+                    updateTotals();
+                });
+                
+                invoiceItemsBody.appendChild(row);
+                
+                // Update totals
+                if (item) {
+                    updateRowTotal(row);
+                }
+                
+                return row;
+            }
+            
+            // Update row total
+            function updateRowTotal(row) {
+                const unitPriceText = row.querySelector('.unit-price').textContent;
+                const unitPrice = parseFloat(unitPriceText.replace('₹', ''));
+                const quantity = parseInt(row.querySelector('.quantity-input').value);
+                const discountPercent = parseFloat(row.querySelector('.discount-input').value) || 0;
+                
+                // Calculate row total
+                const discountAmount = unitPrice * quantity * (discountPercent / 100);
+                const rowTotal = unitPrice * quantity - discountAmount;
+                
+                // Update row total display
+                row.querySelector('.row-total').textContent = '₹' + rowTotal.toFixed(2);
+                
+                // Update overall totals
+                updateTotals();
+            }
+            
+            // Update invoice totals
+            function updateTotals() {
+                subtotal = 0;
+                discount = 0;
+                
+                // Calculate subtotal and total discount
+                const rows = invoiceItemsBody.querySelectorAll('tr');
+                rows.forEach(row => {
+                    const unitPriceText = row.querySelector('.unit-price').textContent;
+                    const unitPrice = parseFloat(unitPriceText.replace('₹', ''));
+                    const quantity = parseInt(row.querySelector('.quantity-input').value);
+                    const discountPercent = parseFloat(row.querySelector('.discount-input').value) || 0;
+                    
+                    const rowSubtotal = unitPrice * quantity;
+                    const rowDiscount = rowSubtotal * (discountPercent / 100);
+                    
+                    subtotal += rowSubtotal;
+                    discount += rowDiscount;
+                });
+                
+                // Calculate tax
+                const tax = (subtotal - discount) * taxRate;
+                
+                // Calculate total
+                total = subtotal - discount + tax;
+                
+                // Update display
+                document.getElementById('subtotalAmount').textContent = '₹' + subtotal.toFixed(2);
+                document.getElementById('discountAmount').textContent = '-₹' + discount.toFixed(2);
+                document.getElementById('taxAmount').textContent = '₹' + tax.toFixed(2);
+                document.getElementById('totalAmount').textContent = '₹' + total.toFixed(2);
+            }
+            
+            // Open product search modal
+            function openProductSearch(row) {
+                // Store current row being edited
+                currentItemRow = row;
+                
+                // Clear previous search
+                productSearchInput.value = '';
+                productSearchResults.innerHTML = '';
+                noProductsFoundMessage.style.display = 'none';
+                
+                // Show modal
+                productSearchModal.show();
+                
+                // Load products for search
+                loadProducts();
+            }
+            
+            // Load products for search
+            function loadProducts(search = '') {
+                loadingProducts.style.display = 'block';
+                noProductsFoundMessage.style.display = 'none';
+                productSearchResults.innerHTML = '';
+                
+                // Build query string
+                let queryParams = search ? `?search=${encodeURIComponent(search)}` : '';
+                
+                fetch(`${apiUrl}/products${queryParams}`, {
+                    headers: {
+                        'x-access-token': token
+                    }
+                })
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Failed to fetch products');
+                    }
+                    return response.json();
+                })
+                .then(products => {
+                    loadingProducts.style.display = 'none';
+                    
+                    if (products.length === 0) {
+                        noProductsFoundMessage.style.display = 'block';
+                        return;
+                    }
+                    
+                    // Store products in cache
+                    products.forEach(product => {
+                        productsCache[product.id] = product;
+                    });
+                    
+                    // Render products
+                    products.forEach(product => {
+                        renderProductSearchRow(product);
+                    });
+                })
+                .catch(error => {
+                    console.error('Error fetching products:', error);
+                    loadingProducts.style.display = 'none';
+                    noProductsFoundMessage.style.display = 'block';
+                    noProductsFoundMessage.textContent = 'Error loading products. Please try again.';
+                });
+            }
+            
+            // Render a product search result row
+            function renderProductSearchRow(product) {
+                const row = document.createElement('tr');
+                
+                // Determine stock status
+                let stockStatus = product.quantity > 0 ? `${product.quantity} available` : 'Out of stock';
+                let stockClass = product.quantity > 0 ? 'text-success' : 'text-danger';
+                
+                row.innerHTML = `
+                    <td>${product.name}</td>
+                    <td>${product.sku || '-'}</td>
+                    <td>₹${product.sellingPrice.toFixed(2)}</td>
+                    <td class="${stockClass}">${stockStatus}</td>
+                    <td>
+                        <button class="btn btn-sm btn-primary select-item-btn" data-id="${product.id}" 
+                            ${product.quantity <= 0 ? 'disabled' : ''}>
+                            Select
+                        </button>
+                    </td>
+                `;
+                
+                // Add event listener for select button
+                const selectBtn = row.querySelector('.select-item-btn');
+                selectBtn.addEventListener('click', function() {
+                    selectProduct(product);
+                });
+                
+                productSearchResults.appendChild(row);
+            }
+            
+            // Product search functionality
+            searchProductBtn.addEventListener('click', function() {
+                const searchTerm = productSearchInput.value.trim();
+                loadProducts(searchTerm);
+            });
+            
+            productSearchInput.addEventListener('keyup', function(e) {
+                if (e.key === 'Enter') {
+                    const searchTerm = productSearchInput.value.trim();
+                    loadProducts(searchTerm);
+                }
+            });
+            
+            // Select a product
+            function selectProduct(product) {
+                if (currentItemRow) {
+                    // Update row with selected product
+                    currentItemRow.dataset.productId = product.id;
+                    currentItemRow.querySelector('.product-name').textContent = product.name;
+                    currentItemRow.querySelector('.unit-price').textContent = '₹' + product.sellingPrice.toFixed(2);
+                    
+                    // Update row total
+                    updateRowTotal(currentItemRow);
+                }
+                
+                // Close modal
+                productSearchModal.hide();
+                currentItemRow = null;
+            }
+            
+            // Search and filter invoices
+            searchBtn.addEventListener('click', performSearch);
+            searchInput.addEventListener('keyup', function(e) {
+                if (e.key === 'Enter') {
+                    performSearch();
+                }
+            });
+            
+            statusFilter.addEventListener('change', performSearch);
+            startDateFilter.addEventListener('change', performSearch);
+            endDateFilter.addEventListener('change', performSearch);
+            
+            resetFilterBtn.addEventListener('click', function() {
+                searchInput.value = '';
+                statusFilter.value = '';
+                startDateFilter.value = '';
+                endDateFilter.value = '';
+                loadInvoices();
+            });
+            
+            function performSearch() {
+                const searchTerm = searchInput.value.trim();
+                const status = statusFilter.value;
+                const startDate = startDateFilter.value;
+                const endDate = endDateFilter.value;
+                
+                loadInvoices(searchTerm, status, startDate, endDate);
+            }
+            
+            // Load invoices from API
+            function loadInvoices(search = '', status = '', startDate = '', endDate = '') {
+                loadingInvoices.style.display = 'block';
+                noInvoicesMessage.style.display = 'none';
+                invoicesTableBody.innerHTML = '';
+                
+                // Build query string
+                let queryParams = [];
+                if (search) queryParams.push(`search=${encodeURIComponent(search)}`);
+                if (status) queryParams.push(`paymentStatus=${encodeURIComponent(status)}`);
+                if (startDate) queryParams.push(`startDate=${encodeURIComponent(startDate)}`);
+                if (endDate) queryParams.push(`endDate=${encodeURIComponent(endDate)}`);
+                
+                const queryString = queryParams.length > 0 ? `?${queryParams.join('&')}` : '';
+                
+                fetch(`${apiUrl}/invoices${queryString}`, {
+                    headers: {
+                        'x-access-token': token
+                    }
+                })
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Failed to fetch invoices');
+                    }
+                    return response.json();
+                })
+                .then(invoices => {
+                    loadingInvoices.style.display = 'none';
+                    
+                    if (invoices.length === 0) {
+                        noInvoicesMessage.style.display = 'block';
+                        return;
+                    }
+                    
+                    // Render invoices
+                    invoices.forEach(invoice => {
+                        renderInvoiceRow(invoice);
+                    });
+                })
+                .catch(error => {
+                    console.error('Error fetching invoices:', error);
+                    loadingInvoices.style.display = 'none';
+                    noInvoicesMessage.style.display = 'block';
+                    noInvoicesMessage.textContent = 'Error loading invoices. Please try again.';
+                });
+            }
+            
+            // Render a single invoice row
+            function renderInvoiceRow(invoice) {
+                const row = document.createElement('tr');
+                
+                // Format date
+                const date = new Date(invoice.createdAt).toLocaleDateString();
+                
+                // Determine status badge class
+                let statusBadgeClass = '';
+                if (invoice.paymentStatus === 'paid') {
+                    statusBadgeClass = 'badge-paid';
+                } else if (invoice.paymentStatus === 'partial') {
+                    statusBadgeClass = 'badge-partial';
+                } else {
+                    statusBadgeClass = 'badge-unpaid';
+                }
+                
+                row.innerHTML = `
+                    <td>${invoice.invoiceNumber || `INV-${invoice.id}`}</td>
+                    <td>${invoice.customerName}</td>
+                    <td>${date}</td>
+                    <td>₹${invoice.total.toFixed(2)}</td>
+                    <td><span class="badge badge-status ${statusBadgeClass}">${invoice.paymentStatus || 'unpaid'}</span></td>
+                    <td>
+                        <div class="dropdown">
+                            <button class="btn btn-sm btn-outline-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown">
+                                Actions
+                            </button>
+                            <ul class="dropdown-menu">
+                                <li><a class="dropdown-item view-invoice" href="#" data-id="${invoice.id}"><i class="bi bi-eye"></i> View</a></li>
+                                <li><a class="dropdown-item edit-invoice" href="#" data-id="${invoice.id}"><i class="bi bi-pencil"></i> Edit</a></li>
+                                <li><a class="dropdown-item download-pdf" href="#" data-id="${invoice.id}"><i class="bi bi-file-pdf"></i> Download PDF</a></li>
+                                <li><a class="dropdown-item email-invoice" href="#" data-id="${invoice.id}"><i class="bi bi-envelope"></i> Email</a></li>
+                                <li><hr class="dropdown-divider"></li>
+                                <li><a class="dropdown-item delete-invoice" href="#" data-id="${invoice.id}"><i class="bi bi-trash"></i> Delete</a></li>
+                            </ul>
+                        </div>
+                    </td>
+                `;
+                
+                // Add event listeners to action buttons
+                const viewButton = row.querySelector('.view-invoice');
+                const editButton = row.querySelector('.edit-invoice');
+                const downloadButton = row.querySelector('.download-pdf');
+                const emailButton = row.querySelector('.email-invoice');
+                const deleteButton = row.querySelector('.delete-invoice');
+                
+                viewButton.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    viewInvoice(invoice.id);
+                });
+                
+                editButton.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    editInvoice(invoice.id);
+                });
+                
+                downloadButton.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    downloadInvoicePdf(invoice.id);
+                });
+                
+                emailButton.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    openEmailModal(invoice.id, invoice.customerEmail);
+                });
+                
+                deleteButton.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    showDeleteConfirmation(invoice.id);
+                });
+                
+                invoicesTableBody.appendChild(row);
+            }
+            
+            // View invoice details
+            function viewInvoice(invoiceId) {
+                fetch(`${apiUrl}/invoices/${invoiceId}`, {
+                    headers: {
+                        'x-access-token': token
+                    }
+                })
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Failed to fetch invoice details');
+                    }
+                    return response.json();
+                })
+                .then(invoice => {
+                    // Set current invoice ID for download
+                    currentInvoiceId = invoice.id;
+                    
+                    // Generate preview
+                    generateInvoicePreview(invoice);
+                    
+                    // Show preview modal
+                    invoicePreviewModal.show();
+                })
+                .catch(error => {
+                    console.error('Error fetching invoice details:', error);
+                    alert('Error fetching invoice details: ' + error.message);
+                });
+            }
+            
+            // Preview invoice from form
+            previewInvoiceBtn.addEventListener('click', function() {
+                // Check if there are any items
+                if (invoiceItemsBody.children.length === 0) {
+                    alert('Please add at least one item to the invoice.');
+                    return;
+                }
+                
+                // Create invoice object from form
+                const invoice = {
+                    customerName: document.getElementById('customerName').value,
+                    customerEmail: document.getElementById('customerEmail').value,
+                    customerPhone: document.getElementById('customerPhone').value,
+                    customerAddress: document.getElementById('customerAddress').value,
+                    subtotal: subtotal,
+                    taxAmount: subtotal * taxRate,
+                    discountAmount: discount,
+                    total: total,
+                    paymentStatus: document.getElementById('paymentStatus').value,
+                    paymentMethod: document.getElementById('paymentMethod').value,
+                    notes: document.getElementById('notes').value,
+                    items: [],
+                    createdAt: new Date()
+                };
+                
+                // Get all items from the table
+                const rows = invoiceItemsBody.querySelectorAll('tr');
+                rows.forEach(row => {
+                    const productName = row.querySelector('.product-name').textContent;
+                    const unitPrice = parseFloat(row.querySelector('.unit-price').textContent.replace('₹', ''));
+                    const quantity = parseInt(row.querySelector('.quantity-input').value);
+                    const discountPercent = parseFloat(row.querySelector('.discount-input').value) || 0;
+                    const rowTotal = parseFloat(row.querySelector('.row-total').textContent.replace('₹', ''));
+                    
+                    invoice.items.push({
+                        productName,
+                        unitPrice,
+                        quantity,
+                        discount: discountPercent,
+                        total: rowTotal
+                    });
+                });
+                
+                // Generate preview
+                generateInvoicePreview(invoice);
+                
+                // Show preview modal
+                invoicePreviewModal.show();
+            });
+            
+            // Generate invoice preview
+            function generateInvoicePreview(invoice) {
+                // Format date
+                const date = new Date(invoice.createdAt).toLocaleDateString();
+                
+                // Start HTML for preview
+                let html = `
+                    <div class="invoice-header">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <h4>ReSellPro</h4>
+                                <p>Smart Business Hub for Resellers</p>
+                            </div>
+                            <div class="col-md-6 text-end">
+                                <h5>INVOICE</h5>
+                                <p><strong>Invoice #:</strong> ${invoice.invoiceNumber || `INV-${invoice.id}`}</p>
+                                <p><strong>Date:</strong> ${date}</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="invoice-details">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <h6>Bill To:</h6>
+                                <p><strong>${invoice.customerName}</strong></p>
+                                ${invoice.customerAddress ? `<p>${invoice.customerAddress}</p>` : ''}
+                                ${invoice.customerEmail ? `<p>Email: ${invoice.customerEmail}</p>` : ''}
+                                ${invoice.customerPhone ? `<p>Phone: ${invoice.customerPhone}</p>` : ''}
+                            </div>
+                            <div class="col-md-6 text-end">
+                                <h6>Payment Status:</h6>
+                                <p><strong>${invoice.paymentStatus.toUpperCase() || 'UNPAID'}</strong></p>
+                                ${invoice.paymentMethod ? `<p>Payment Method: ${invoice.paymentMethod}</p>` : ''}
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="table-responsive">
+                        <table class="table table-bordered invoice-table">
+                            <thead>
+                                <tr>
+                                    <th>Item</th>
+                                    <th class="text-end">Unit Price</th>
+                                    <th class="text-end">Quantity</th>
+                                    <th class="text-end">Discount</th>
+                                    <th class="text-end">Total</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                `;
+                
+                // Add invoice items
+                invoice.items.forEach(item => {
+                    html += `
+                        <tr>
+                            <td>${item.productName}</td>
+                            <td class="text-end">₹${item.unitPrice.toFixed(2)}</td>
+                            <td class="text-end">${item.quantity}</td>
+                            <td class="text-end">${item.discount || 0}%</td>
+                            <td class="text-end">₹${item.total.toFixed(2)}</td>
+                        </tr>
+                    `;
+                });
+                
+                // Add invoice summary
+                html += `
+                            </tbody>
+                        </table>
+                    </div>
+                    
+                    <div class="invoice-total">
+                        <div class="row">
+                            <div class="col-md-6">
+                                ${invoice.notes ? `
+                                <h6>Notes:</h6>
+                                <p>${invoice.notes}</p>
+                                ` : ''}
+                            </div>
+                            <div class="col-md-6">
+                                <div class="d-flex justify-content-between mb-2">
+                                    <span>Subtotal:</span>
+                                    <span>₹${invoice.subtotal.toFixed(2)}</span>
+                                </div>
+                                ${invoice.discountAmount > 0 ? `
+                                <div class="d-flex justify-content-between mb-2">
+                                    <span>Discount:</span>
+                                    <span>-₹${invoice.discountAmount.toFixed(2)}</span>
+                                </div>
+                                ` : ''}
+                                ${invoice.taxAmount > 0 ? `
+                                <div class="d-flex justify-content-between mb-2">
+                                    <span>Tax:</span>
+                                    <span>₹${invoice.taxAmount.toFixed(2)}</span>
+                                </div>
+                                ` : ''}
+                                <hr>
+                                <div class="d-flex justify-content-between">
+                                    <strong>Total:</strong>
+                                    <strong>₹${invoice.total.toFixed(2)}</strong>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="text-center mt-4">
+                        <p>Thank you for your business!</p>
+                    </div>
+                `;
+                
+                // Set the HTML
+                invoicePreview.innerHTML = html;
+                
+                // Update email fields
+                if (invoice.customerEmail) {
+                    emailTo.value = invoice.customerEmail;
+                }
+            }
+            
+            // Edit invoice
+            function editInvoice(invoiceId) {
+                fetch(`${apiUrl}/invoices/${invoiceId}`, {
+                    headers: {
+                        'x-access-token': token
+                    }
+                })
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Failed to fetch invoice details');
+                    }
+                    return response.json();
+                })
+                .then(invoice => {
+                    // Set form title
+                    formTitle.textContent = 'Edit Invoice';
+                    
+                    // Fill form with invoice data
+                    document.getElementById('invoiceId').value = invoice.id;
+                    document.getElementById('customerName').value = invoice.customerName;
+                    document.getElementById('customerEmail').value = invoice.customerEmail || '';
+                    document.getElementById('customerPhone').value = invoice.customerPhone || '';
+                    document.getElementById('customerAddress').value = invoice.customerAddress || '';
+                    document.getElementById('paymentStatus').value = invoice.paymentStatus || 'unpaid';
+                    document.getElementById('paymentMethod').value = invoice.paymentMethod || '';
+                    document.getElementById('notes').value = invoice.notes || '';
+                    document.getElementById('taxPercentage').value = invoice.taxAmount && invoice.subtotal > 0 ? ((invoice.taxAmount / invoice.subtotal) * 100).toFixed(1) : 18;
+                    
+                    // Clear existing items
+                    invoiceItemsBody.innerHTML = '';
+                    
+                    // Add invoice items
+                    if (invoice.items && invoice.items.length > 0) {
+                        invoice.items.forEach(item => {
+                            addItemRow(item);
+                        });
+                    }
+                    
+                    // Set current invoice ID
+                    currentInvoiceId = invoice.id;
+                    
+                    // Update totals
+                    updateTotals();
+                    
+                    // Show form
+                    invoiceForm.style.display = 'block';
+                    window.scrollTo({ top: 0, behavior: 'smooth' });
+                })
+                .catch(error => {
+                    console.error('Error fetching invoice details:', error);
+                    alert('Error fetching invoice details: ' + error.message);
+                });
+            }
+            
+            // Download invoice PDF
+            function downloadInvoicePdf(invoiceId) {
+                // Open in new tab to trigger download
+                window.open(`${apiUrl}/invoices/${invoiceId}/pdf`, '_blank');
+            }
+            
+            // Download PDF from modal
+            downloadPdfBtn.addEventListener('click', function() {
+                if (currentInvoiceId) {
+                    downloadInvoicePdf(currentInvoiceId);
+                }
+            });
+            
+            // Open email modal
+            function openEmailModal(invoiceId, customerEmail) {
+                currentInvoiceId = invoiceId;
+                
+                if (customerEmail) {
+                    emailTo.value = customerEmail;
+                } else {
+                    emailTo.value = '';
+                }
+                
+                sendEmailModal.show();
+            }
+            
+            // Send email
+            confirmSendEmailBtn.addEventListener('click', function() {
+                if (!currentInvoiceId) return;
+                
+                const email = emailTo.value;
+                
+                if (!email) {
+                    alert('Please enter an email address.');
+                    return;
+                }
+                
+                fetch(`${apiUrl}/invoices/${currentInvoiceId}/email`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'x-access-token': token
+                    },
+                    body: JSON.stringify({
+                        email: email,
+                        subject: document.getElementById('emailSubject').value,
+                        message: document.getElementById('emailMessage').value
+                    })
+                })
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Failed to send email');
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    // Hide modal
+                    sendEmailModal.hide();
+                    
+                    // Show success message
+                    invoiceAlert.textContent = 'Invoice sent by email successfully!';
+                    invoiceAlert.className = 'alert alert-success';
+                    invoiceAlert.style.display = 'block';
+                    
+                    // Hide alert after 3 seconds
+                    setTimeout(() => {
+                        invoiceAlert.style.display = 'none';
+                    }, 3000);
+                })
+                .catch(error => {
+                    console.error('Error sending email:', error);
+                    
+                    // Hide modal
+                    sendEmailModal.hide();
+                    
+                    // Show error message
+                    invoiceAlert.textContent = 'Error sending email: ' + error.message;
+                    invoiceAlert.className = 'alert alert-danger';
+                    invoiceAlert.style.display = 'block';
+                    
+                    // Hide alert after 3 seconds
+                    setTimeout(() => {
+                        invoiceAlert.style.display = 'none';
+                    }, 3000);
+                });
+            });
+            
+            // Delete confirmation
+            function showDeleteConfirmation(invoiceId) {
+                currentInvoiceId = invoiceId;
+                deleteModal.show();
+            }
+            
+            // Confirm delete
+            confirmDeleteBtn.addEventListener('click', function() {
+                if (!currentInvoiceId) return;
+                
+                fetch(`${apiUrl}/invoices/${currentInvoiceId}`, {
+                    method: 'DELETE',
+                    headers: {
+                        'x-access-token': token
+                    }
+                })
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Failed to delete invoice');
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    // Hide modal
+                    deleteModal.hide();
+                    
+                    // Show success message
+                    invoiceAlert.textContent = 'Invoice deleted successfully!';
+                    invoiceAlert.className = 'alert alert-success';
+                    invoiceAlert.style.display = 'block';
+                    
+                    // Reload invoices
+                    loadInvoices();
+                    
+                    // Reset current invoice ID
+                    currentInvoiceId = null;
+                    
+                    // Hide alert after 3 seconds
+                    setTimeout(() => {
+                        invoiceAlert.style.display = 'none';
+                    }, 3000);
+                })
+                .catch(error => {
+                    console.error('Error deleting invoice:', error);
+                    
+                    // Hide modal
+                    deleteModal.hide();
+                    
+                    // Show error message
+                    invoiceAlert.textContent = 'Error deleting invoice: ' + error.message;
+                    invoiceAlert.className = 'alert alert-danger';
+                    invoiceAlert.style.display = 'block';
+                    
+                    // Hide alert after 3 seconds
+                    setTimeout(() => {
+                        invoiceAlert.style.display = 'none';
+                    }, 3000);
+                });
+            });
+            
+            // Generate invoice number
+            function generateInvoiceNumber() {
+                const today = new Date();
+                const year = today.getFullYear().toString().substr(-2);
+                const month = (today.getMonth() + 1).toString().padStart(2, '0');
+                const random = Math.floor(Math.random() * (999 - 100) + 100);
+                
+                // Format: INVYYMM-XXX
+                return `INV${year}${month}-${random}`;
+            }
+            
+            // Reset form function
+            function resetForm() {
+                invoiceDetailsForm.reset();
+                currentInvoiceId = null;
+                document.getElementById('invoiceId').value = '';
+                invoiceItemsBody.innerHTML = '';
+                document.getElementById('subtotalAmount').textContent = '₹0.00';
+                document.getElementById('discountAmount').textContent = '-₹0.00';
+                document.getElementById('taxAmount').textContent = '₹0.00';
+                document.getElementById('totalAmount').textContent = '₹0.00';
+                taxRate = 0.18;
+                document.getElementById('taxPercentage').value = '18';
+            }
+            
+            // Initial load of invoices
+            loadInvoices();
+        });
+    </script>
+</body>
+</html>
