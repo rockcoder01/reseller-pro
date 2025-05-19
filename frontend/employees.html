@@ -1,0 +1,2512 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Employee Management - ReSellPro</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f8f9fa;
+        }
+        .navbar {
+            background-color: #343a40;
+        }
+        .navbar-brand {
+            font-weight: bold;
+            color: #ffffff;
+        }
+        .sidebar {
+            position: fixed;
+            top: 56px;
+            bottom: 0;
+            left: 0;
+            z-index: 100;
+            padding: 0;
+            box-shadow: inset -1px 0 0 rgba(0, 0, 0, .1);
+            background-color: #fff;
+            width: 250px;
+            transition: all 0.3s;
+        }
+        .sidebar .nav-link {
+            color: #333;
+            padding: 12px 20px;
+            margin-bottom: 5px;
+            border-radius: 0;
+            transition: all 0.3s;
+        }
+        .sidebar .nav-link:hover, .sidebar .nav-link.active {
+            color: #4a6bdf;
+            background-color: #f8f9fa;
+            border-left: 3px solid #4a6bdf;
+            padding-left: 17px;
+        }
+        .sidebar .nav-link i {
+            margin-right: 10px;
+            width: 20px;
+            text-align: center;
+        }
+        .main-content {
+            margin-left: 250px;
+            padding: 20px;
+            transition: all 0.3s;
+        }
+        @media (max-width: 768px) {
+            .sidebar {
+                margin-left: -250px;
+            }
+            .sidebar.active {
+                margin-left: 0;
+            }
+            .main-content {
+                margin-left: 0;
+            }
+            .main-content.active {
+                margin-left: 250px;
+            }
+        }
+        .card {
+            border-radius: 10px;
+            border: none;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+            margin-bottom: 20px;
+        }
+        .btn-primary {
+            background-color: #4a6bdf;
+            border-color: #4a6bdf;
+        }
+        .btn-primary:hover {
+            background-color: #3a5ac7;
+            border-color: #3a5ac7;
+        }
+        .table-responsive {
+            border-radius: 10px;
+            overflow: hidden;
+        }
+        .avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background-color: #4a6bdf;
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 16px;
+        }
+        .dropdown-toggle::after {
+            display: none;
+        }
+        .filter-card {
+            border-radius: 10px;
+            border: none;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+            margin-bottom: 20px;
+        }
+        #employeeForm {
+            display: none;
+        }
+        .employee-photo {
+            width: 150px;
+            height: 150px;
+            border: 2px dashed #ddd;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background-color: #f8f9fa;
+            margin-bottom: 15px;
+            position: relative;
+            overflow: hidden;
+        }
+        .employee-photo img {
+            max-width: 100%;
+            max-height: 100%;
+            object-fit: cover;
+        }
+        .employee-photo .upload-icon {
+            font-size: 2rem;
+            color: #aaa;
+        }
+        .employee-img-small {
+            width: 50px;
+            height: 50px;
+            object-fit: cover;
+            border-radius: 8px;
+        }
+        .badge-status {
+            padding: 5px 10px;
+            border-radius: 20px;
+            font-weight: 500;
+        }
+        .badge-active {
+            background-color: #e3fcef;
+            color: #00a854;
+        }
+        .badge-inactive {
+            background-color: #ffebee;
+            color: #c62828;
+        }
+        #employeeAlert {
+            display: none;
+        }
+        .nav-tabs .nav-link {
+            border: none;
+            color: #6c757d;
+            font-weight: 500;
+            padding: 15px 20px;
+        }
+        .nav-tabs .nav-link.active {
+            border-bottom: 3px solid #4a6bdf;
+            color: #4a6bdf;
+            font-weight: 600;
+            background-color: transparent;
+        }
+        .nav-tabs .nav-link:hover {
+            border-color: transparent;
+            color: #4a6bdf;
+        }
+        .calendar-table th, .calendar-table td {
+            text-align: center;
+            vertical-align: middle;
+            width: 40px;
+            height: 40px;
+            padding: 5px;
+        }
+        .calendar-day {
+            border-radius: 50%;
+            width: 30px;
+            height: 30px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .calendar-day:hover {
+            background-color: #f0f0f0;
+        }
+        .calendar-day.present {
+            background-color: #e3fcef;
+            color: #00a854;
+        }
+        .calendar-day.absent {
+            background-color: #ffebee;
+            color: #c62828;
+        }
+        .calendar-day.half-day {
+            background-color: #fff3e0;
+            color: #e65100;
+        }
+        .calendar-day.late {
+            background-color: #e8f5e9;
+            color: #2e7d32;
+        }
+        .calendar-day.today {
+            border: 2px solid #4a6bdf;
+            font-weight: bold;
+        }
+        .calendar-day.disabled {
+            color: #bbb;
+            cursor: default;
+        }
+        .calendar-day.disabled:hover {
+            background-color: transparent;
+        }
+        .stat-card {
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+            transition: transform 0.3s;
+        }
+        .stat-card:hover {
+            transform: translateY(-5px);
+        }
+        .stat-card-header {
+            padding: 15px;
+            color: white;
+        }
+        .stat-card-body {
+            padding: 15px;
+            background-color: white;
+        }
+        .stat-card-total {
+            font-size: 24px;
+            font-weight: bold;
+        }
+        .stat-card-text {
+            color: #6c757d;
+            font-size: 14px;
+        }
+        .bg-employees {
+            background-color: #4a6bdf;
+        }
+        .bg-attendance {
+            background-color: #00a854;
+        }
+        .bg-salary {
+            background-color: #e65100;
+        }
+        .stat-icon {
+            font-size: 24px;
+            margin-right: 10px;
+        }
+    </style>
+</head>
+<body>
+    <!-- Top Navigation -->
+    <nav class="navbar navbar-expand-lg navbar-dark sticky-top">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="#">ReSellPro</a>
+            <button class="navbar-toggler" type="button" id="sidebarToggle">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <form class="d-flex ms-auto me-3">
+                    <div class="input-group">
+                        <input class="form-control" type="search" placeholder="Search" aria-label="Search">
+                        <button class="btn btn-outline-light" type="submit"><i class="bi bi-search"></i></button>
+                    </div>
+                </form>
+                
+                <ul class="navbar-nav">
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" id="notificationsDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                            <i class="bi bi-bell"></i>
+                            <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
+                                3
+                            </span>
+                        </a>
+                        <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="notificationsDropdown">
+                            <li><h6 class="dropdown-header">Notifications</h6></li>
+                            <li><a class="dropdown-item" href="#">Low stock alert: 5 products</a></li>
+                            <li><a class="dropdown-item" href="#">New order received: INV-1001</a></li>
+                            <li><a class="dropdown-item" href="#">Payment received: ₹15,000</a></li>
+                            <li><hr class="dropdown-divider"></li>
+                            <li><a class="dropdown-item text-primary" href="#">View all notifications</a></li>
+                        </ul>
+                    </li>
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle d-flex align-items-center" href="#" id="userDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                            <div class="avatar me-2" id="userAvatar">JS</div>
+                            <span id="userName">User</span>
+                        </a>
+                        <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="userDropdown">
+                            <li><a class="dropdown-item" href="profile.html"><i class="bi bi-person me-2"></i>Profile</a></li>
+                            <li><a class="dropdown-item" href="#"><i class="bi bi-gear me-2"></i>Settings</a></li>
+                            <li><hr class="dropdown-divider"></li>
+                            <li><a class="dropdown-item" href="#" id="logoutButton"><i class="bi bi-box-arrow-right me-2"></i>Logout</a></li>
+                        </ul>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Sidebar -->
+    <div class="sidebar">
+        <ul class="nav flex-column mt-4">
+            <li class="nav-item">
+                <a class="nav-link" href="dashboard.html">
+                    <i class="bi bi-speedometer2"></i> Dashboard
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="inventory.html">
+                    <i class="bi bi-box-seam"></i> Inventory
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="invoice.html">
+                    <i class="bi bi-receipt"></i> Invoices
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="expenses.html">
+                    <i class="bi bi-currency-rupee"></i> Expenses
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link active" href="employees.html">
+                    <i class="bi bi-people"></i> Employees
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="reports.html">
+                    <i class="bi bi-bar-chart"></i> Reports
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="#">
+                    <i class="bi bi-gear"></i> Settings
+                </a>
+            </li>
+        </ul>
+    </div>
+
+    <!-- Main Content -->
+    <div class="main-content">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h2>Employee Management</h2>
+            <button id="addEmployeeBtn" class="btn btn-primary">
+                <i class="bi bi-plus-circle"></i> Add New Employee
+            </button>
+        </div>
+        
+        <div class="alert alert-success" id="employeeAlert" role="alert">
+            Employee saved successfully!
+        </div>
+        
+        <!-- Stats Row -->
+        <div class="row mb-4">
+            <div class="col-xl-4 col-md-6 mb-4">
+                <div class="stat-card">
+                    <div class="stat-card-header bg-employees d-flex align-items-center">
+                        <i class="bi bi-people-fill stat-icon"></i>
+                        <div>Total Employees</div>
+                    </div>
+                    <div class="stat-card-body">
+                        <div class="stat-card-total"><span id="totalEmployees">0</span></div>
+                        <div class="stat-card-text">Active employees in your team</div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-xl-4 col-md-6 mb-4">
+                <div class="stat-card">
+                    <div class="stat-card-header bg-attendance d-flex align-items-center">
+                        <i class="bi bi-calendar-check-fill stat-icon"></i>
+                        <div>Today's Attendance</div>
+                    </div>
+                    <div class="stat-card-body">
+                        <div class="stat-card-total"><span id="todayAttendance">0</span>/<span id="totalForAttendance">0</span></div>
+                        <div class="stat-card-text">Employees present today</div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-xl-4 col-md-6 mb-4">
+                <div class="stat-card">
+                    <div class="stat-card-header bg-salary d-flex align-items-center">
+                        <i class="bi bi-cash-stack stat-icon"></i>
+                        <div>Monthly Salary</div>
+                    </div>
+                    <div class="stat-card-body">
+                        <div class="stat-card-total">₹<span id="monthlySalary">0</span></div>
+                        <div class="stat-card-text">Total salary expenses</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Employee Form Card -->
+        <div class="card mb-4" id="employeeForm">
+            <div class="card-header bg-primary text-white">
+                <h5 class="mb-0" id="formTitle">Add New Employee</h5>
+            </div>
+            <div class="card-body">
+                <form id="employeeDetailsForm">
+                    <input type="hidden" id="employeeId">
+                    <div class="row mb-3">
+                        <div class="col-md-8">
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label for="firstName" class="form-label">First Name*</label>
+                                    <input type="text" class="form-control" id="firstName" required>
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label for="lastName" class="form-label">Last Name*</label>
+                                    <input type="text" class="form-control" id="lastName" required>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label for="email" class="form-label">Email</label>
+                                    <input type="email" class="form-control" id="email">
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label for="phone" class="form-label">Phone</label>
+                                    <input type="tel" class="form-control" id="phone">
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label for="position" class="form-label">Position*</label>
+                                    <input type="text" class="form-control" id="position" required>
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label for="joinDate" class="form-label">Join Date*</label>
+                                    <input type="date" class="form-control" id="joinDate" required>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label">Employee Photo (Optional)</label>
+                            <div class="employee-photo" id="photoPreview">
+                                <i class="bi bi-person-bounding-box upload-icon" id="uploadIcon"></i>
+                                <img id="employeePhoto" style="display: none;">
+                            </div>
+                            <input type="file" class="form-control" id="photoUpload" accept="image/*">
+                        </div>
+                    </div>
+                    
+                    <div class="row mb-3">
+                        <div class="col-md-4 mb-3">
+                            <label for="salary" class="form-label">Salary (₹)*</label>
+                            <input type="number" class="form-control" id="salary" step="0.01" required>
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <label for="paymentType" class="form-label">Payment Type*</label>
+                            <select class="form-select" id="paymentType" required>
+                                <option value="daily">Daily</option>
+                                <option value="weekly">Weekly</option>
+                                <option value="monthly" selected>Monthly</option>
+                            </select>
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <label for="status" class="form-label">Status*</label>
+                            <select class="form-select" id="status" required>
+                                <option value="active">Active</option>
+                                <option value="inactive">Inactive</option>
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <div class="row mb-3">
+                        <div class="col-md-12 mb-3">
+                            <label for="notes" class="form-label">Notes</label>
+                            <textarea class="form-control" id="notes" rows="3"></textarea>
+                        </div>
+                    </div>
+                    
+                    <div class="d-flex justify-content-end">
+                        <button type="button" class="btn btn-secondary me-2" id="cancelBtn">Cancel</button>
+                        <button type="submit" class="btn btn-primary">Save Employee</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+        
+        <!-- Employees Table Card -->
+        <div class="card">
+            <div class="card-body">
+                <ul class="nav nav-tabs mb-4" id="employeeTabs" role="tablist">
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link active" id="employees-tab" data-bs-toggle="tab" data-bs-target="#employees" type="button" role="tab" aria-controls="employees" aria-selected="true">
+                            Employees
+                        </button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link" id="attendance-tab" data-bs-toggle="tab" data-bs-target="#attendance" type="button" role="tab" aria-controls="attendance" aria-selected="false">
+                            Attendance
+                        </button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link" id="salary-tab" data-bs-toggle="tab" data-bs-target="#salary" type="button" role="tab" aria-controls="salary" aria-selected="false">
+                            Salary &amp; Payments
+                        </button>
+                    </li>
+                </ul>
+                
+                <div class="tab-content" id="employeeTabContent">
+                    <!-- Employees Tab -->
+                    <div class="tab-pane fade show active" id="employees" role="tabpanel" aria-labelledby="employees-tab">
+                        <div class="row mb-3">
+                            <div class="col-md-8">
+                                <div class="input-group">
+                                    <input type="text" class="form-control" placeholder="Search employees by name, position, or status" id="searchInput">
+                                    <button class="btn btn-outline-secondary" type="button" id="searchBtn">
+                                        <i class="bi bi-search"></i> Search
+                                    </button>
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <select class="form-select" id="statusFilter">
+                                    <option value="">All Status</option>
+                                    <option value="active">Active</option>
+                                    <option value="inactive">Inactive</option>
+                                </select>
+                            </div>
+                            <div class="col-md-1">
+                                <button class="btn btn-outline-secondary w-100" id="resetFilterBtn">
+                                    <i class="bi bi-x-circle"></i>
+                                </button>
+                            </div>
+                        </div>
+                        
+                        <div class="table-responsive">
+                            <table class="table table-hover" id="employeesTable">
+                                <thead>
+                                    <tr>
+                                        <th>Employee</th>
+                                        <th>Position</th>
+                                        <th>Join Date</th>
+                                        <th>Salary</th>
+                                        <th>Status</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="employeesTableBody">
+                                    <!-- Table rows will be added dynamically -->
+                                </tbody>
+                            </table>
+                        </div>
+                        <div class="text-center" id="noEmployeesMessage" style="display: none;">
+                            <p class="text-muted my-5">No employees found. Try a different search or add new employees.</p>
+                        </div>
+                        <div class="text-center" id="loadingEmployees">
+                            <div class="spinner-border text-primary my-5" role="status">
+                                <span class="visually-hidden">Loading...</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Attendance Tab -->
+                    <div class="tab-pane fade" id="attendance" role="tabpanel" aria-labelledby="attendance-tab">
+                        <div class="row mb-3">
+                            <div class="col-md-4">
+                                <label for="attendanceMonth" class="form-label">Month</label>
+                                <input type="month" class="form-control" id="attendanceMonth">
+                            </div>
+                            <div class="col-md-4">
+                                <label for="attendanceEmployee" class="form-label">Employee</label>
+                                <select class="form-select" id="attendanceEmployee">
+                                    <option value="">All Employees</option>
+                                    <!-- Options will be added dynamically -->
+                                </select>
+                            </div>
+                            <div class="col-md-4 d-flex align-items-end">
+                                <button class="btn btn-primary" id="markAttendanceBtn">
+                                    <i class="bi bi-calendar-check"></i> Mark Today's Attendance
+                                </button>
+                            </div>
+                        </div>
+                        
+                        <div class="card mt-4">
+                            <div class="card-body">
+                                <h5 class="card-title mb-4">Attendance Calendar</h5>
+                                <div class="table-responsive">
+                                    <table class="table table-bordered calendar-table" id="attendanceCalendar">
+                                        <thead>
+                                            <tr>
+                                                <th>Employee</th>
+                                                <!-- Days of the month will be added dynamically -->
+                                            </tr>
+                                        </thead>
+                                        <tbody id="attendanceCalendarBody">
+                                            <!-- Attendance data will be added dynamically -->
+                                        </tbody>
+                                    </table>
+                                </div>
+                                <div class="mt-3">
+                                    <div class="d-flex flex-wrap gap-3">
+                                        <div class="d-flex align-items-center">
+                                            <div class="calendar-day present me-2">P</div>
+                                            <span>Present</span>
+                                        </div>
+                                        <div class="d-flex align-items-center">
+                                            <div class="calendar-day absent me-2">A</div>
+                                            <span>Absent</span>
+                                        </div>
+                                        <div class="d-flex align-items-center">
+                                            <div class="calendar-day half-day me-2">H</div>
+                                            <span>Half Day</span>
+                                        </div>
+                                        <div class="d-flex align-items-center">
+                                            <div class="calendar-day late me-2">L</div>
+                                            <span>Late</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Salary Tab -->
+                    <div class="tab-pane fade" id="salary" role="tabpanel" aria-labelledby="salary-tab">
+                        <div class="row mb-3">
+                            <div class="col-md-8">
+                                <div class="input-group">
+                                    <input type="text" class="form-control" placeholder="Search by employee name" id="salarysearchInput">
+                                    <button class="btn btn-outline-secondary" type="button" id="salarysearchBtn">
+                                        <i class="bi bi-search"></i> Search
+                                    </button>
+                                </div>
+                            </div>
+                            <div class="col-md-4 text-end">
+                                <button class="btn btn-primary" id="processSalaryBtn">
+                                    <i class="bi bi-cash"></i> Process Payments
+                                </button>
+                            </div>
+                        </div>
+                        
+                        <div class="table-responsive">
+                            <table class="table table-hover" id="salaryTable">
+                                <thead>
+                                    <tr>
+                                        <th>Employee</th>
+                                        <th>Position</th>
+                                        <th>Salary</th>
+                                        <th>Payment Type</th>
+                                        <th>Last Payment</th>
+                                        <th>Status</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="salaryTableBody">
+                                    <!-- Table rows will be added dynamically -->
+                                </tbody>
+                            </table>
+                        </div>
+                        <div class="text-center" id="noSalaryMessage" style="display: none;">
+                            <p class="text-muted my-5">No salary records found.</p>
+                        </div>
+                        <div class="text-center" id="loadingSalary">
+                            <div class="spinner-border text-primary my-5" role="status">
+                                <span class="visually-hidden">Loading...</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Mark Attendance Modal -->
+    <div class="modal fade" id="attendanceModal" tabindex="-1" aria-labelledby="attendanceModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="attendanceModalLabel">Mark Attendance</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label for="attendanceDate" class="form-label">Date</label>
+                        <input type="date" class="form-control" id="attendanceDate">
+                    </div>
+                    <div class="table-responsive">
+                        <table class="table table-hover" id="markAttendanceTable">
+                            <thead>
+                                <tr>
+                                    <th>Employee</th>
+                                    <th>Status</th>
+                                    <th>Time In</th>
+                                    <th>Time Out</th>
+                                    <th>Notes</th>
+                                </tr>
+                            </thead>
+                            <tbody id="markAttendanceTableBody">
+                                <!-- Table rows will be added dynamically -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-primary" id="saveAttendanceBtn">Save Attendance</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Process Salary Modal -->
+    <div class="modal fade" id="processSalaryModal" tabindex="-1" aria-labelledby="processSalaryModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="processSalaryModalLabel">Process Salary Payments</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <label for="paymentMonth" class="form-label">Month</label>
+                            <input type="month" class="form-control" id="paymentMonth">
+                        </div>
+                        <div class="col-md-6">
+                            <label for="paymentDate" class="form-label">Payment Date</label>
+                            <input type="date" class="form-control" id="paymentDate">
+                        </div>
+                    </div>
+                    <div class="table-responsive">
+                        <table class="table table-hover" id="processSalaryTable">
+                            <thead>
+                                <tr>
+                                    <th>
+                                        <div class="form-check">
+                                            <input class="form-check-input" type="checkbox" id="selectAllEmployees">
+                                        </div>
+                                    </th>
+                                    <th>Employee</th>
+                                    <th>Base Salary</th>
+                                    <th>Attendance</th>
+                                    <th>Final Amount</th>
+                                    <th>Payment Method</th>
+                                </tr>
+                            </thead>
+                            <tbody id="processSalaryTableBody">
+                                <!-- Table rows will be added dynamically -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-primary" id="confirmSalaryBtn">Process Selected Payments</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Salary History Modal -->
+    <div class="modal fade" id="salaryHistoryModal" tabindex="-1" aria-labelledby="salaryHistoryModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="salaryHistoryModalLabel">Salary Payment History</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div id="salaryHistoryEmployeeInfo" class="mb-4">
+                        <h6 class="employee-name">Employee Name</h6>
+                        <p class="employee-position">Position</p>
+                    </div>
+                    <div class="table-responsive">
+                        <table class="table table-hover" id="salaryHistoryTable">
+                            <thead>
+                                <tr>
+                                    <th>Payment Date</th>
+                                    <th>Period</th>
+                                    <th>Amount</th>
+                                    <th>Payment Method</th>
+                                    <th>Notes</th>
+                                </tr>
+                            </thead>
+                            <tbody id="salaryHistoryTableBody">
+                                <!-- Table rows will be added dynamically -->
+                            </tbody>
+                        </table>
+                    </div>
+                    <div class="text-center" id="noSalaryHistoryMessage" style="display: none;">
+                        <p class="text-muted my-3">No salary payment records found for this employee.</p>
+                    </div>
+                    <div class="text-center" id="loadingSalaryHistory">
+                        <div class="spinner-border text-primary my-3" role="status">
+                            <span class="visually-hidden">Loading...</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Delete Confirmation Modal -->
+    <div class="modal fade" id="deleteModal" tabindex="-1" aria-labelledby="deleteModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="deleteModalLabel">Confirm Delete</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    Are you sure you want to delete this employee? This action cannot be undone.
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-danger" id="confirmDeleteBtn">Delete</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // API URL
+            const apiUrl = 'http://localhost:3000/api';
+            
+            // Check if user is logged in
+            const token = localStorage.getItem('token');
+            const user = JSON.parse(localStorage.getItem('user') || '{}');
+            
+            if (!token) {
+                // Redirect to login if not logged in
+                window.location.href = 'login.html';
+                return;
+            }
+            
+            // Set user display name and avatar
+            const userNameElement = document.getElementById('userName');
+            const userAvatarElement = document.getElementById('userAvatar');
+            
+            if (user.firstName && user.lastName) {
+                userNameElement.textContent = `${user.firstName} ${user.lastName}`;
+                userAvatarElement.textContent = `${user.firstName.charAt(0)}${user.lastName.charAt(0)}`;
+            } else if (user.username) {
+                userNameElement.textContent = user.username;
+                userAvatarElement.textContent = user.username.substring(0, 2).toUpperCase();
+            }
+            
+            // DOM Elements - Employees Tab
+            const employeesTableBody = document.getElementById('employeesTableBody');
+            const employeeForm = document.getElementById('employeeForm');
+            const employeeDetailsForm = document.getElementById('employeeDetailsForm');
+            const formTitle = document.getElementById('formTitle');
+            const addEmployeeBtn = document.getElementById('addEmployeeBtn');
+            const cancelBtn = document.getElementById('cancelBtn');
+            const searchInput = document.getElementById('searchInput');
+            const searchBtn = document.getElementById('searchBtn');
+            const statusFilter = document.getElementById('statusFilter');
+            const resetFilterBtn = document.getElementById('resetFilterBtn');
+            const loadingEmployees = document.getElementById('loadingEmployees');
+            const noEmployeesMessage = document.getElementById('noEmployeesMessage');
+            const employeeAlert = document.getElementById('employeeAlert');
+            const deleteModal = new bootstrap.Modal(document.getElementById('deleteModal'));
+            const confirmDeleteBtn = document.getElementById('confirmDeleteBtn');
+            
+            // DOM Elements - Attendance Tab
+            const attendanceMonth = document.getElementById('attendanceMonth');
+            const attendanceEmployee = document.getElementById('attendanceEmployee');
+            const markAttendanceBtn = document.getElementById('markAttendanceBtn');
+            const attendanceCalendarBody = document.getElementById('attendanceCalendarBody');
+            const attendanceModal = new bootstrap.Modal(document.getElementById('attendanceModal'));
+            const attendanceDate = document.getElementById('attendanceDate');
+            const markAttendanceTableBody = document.getElementById('markAttendanceTableBody');
+            const saveAttendanceBtn = document.getElementById('saveAttendanceBtn');
+            
+            // DOM Elements - Salary Tab
+            const salaryTableBody = document.getElementById('salaryTableBody');
+            const salarysearchInput = document.getElementById('salarysearchInput');
+            const salarysearchBtn = document.getElementById('salarysearchBtn');
+            const processSalaryBtn = document.getElementById('processSalaryBtn');
+            const loadingSalary = document.getElementById('loadingSalary');
+            const noSalaryMessage = document.getElementById('noSalaryMessage');
+            const processSalaryModal = new bootstrap.Modal(document.getElementById('processSalaryModal'));
+            const paymentMonth = document.getElementById('paymentMonth');
+            const paymentDate = document.getElementById('paymentDate');
+            const processSalaryTableBody = document.getElementById('processSalaryTableBody');
+            const selectAllEmployees = document.getElementById('selectAllEmployees');
+            const confirmSalaryBtn = document.getElementById('confirmSalaryBtn');
+            const salaryHistoryModal = new bootstrap.Modal(document.getElementById('salaryHistoryModal'));
+            const salaryHistoryEmployeeInfo = document.getElementById('salaryHistoryEmployeeInfo');
+            const salaryHistoryTableBody = document.getElementById('salaryHistoryTableBody');
+            const loadingSalaryHistory = document.getElementById('loadingSalaryHistory');
+            const noSalaryHistoryMessage = document.getElementById('noSalaryHistoryMessage');
+            
+            // Stats elements
+            const totalEmployees = document.getElementById('totalEmployees');
+            const todayAttendance = document.getElementById('todayAttendance');
+            const totalForAttendance = document.getElementById('totalForAttendance');
+            const monthlySalary = document.getElementById('monthlySalary');
+            
+            // Current employee for editing or deletion
+            let currentEmployeeId = null;
+            
+            // Employee Data Cache
+            let employeesCache = {};
+            
+            // Logout functionality
+            document.getElementById('logoutButton').addEventListener('click', function(e) {
+                e.preventDefault();
+                localStorage.removeItem('token');
+                localStorage.removeItem('user');
+                window.location.href = 'login.html';
+            });
+            
+            // Toggle sidebar on mobile
+            document.getElementById('sidebarToggle').addEventListener('click', function() {
+                document.querySelector('.sidebar').classList.toggle('active');
+                document.querySelector('.main-content').classList.toggle('active');
+            });
+            
+            // Employee photo preview functionality
+            const photoUpload = document.getElementById('photoUpload');
+            const photoPreview = document.getElementById('photoPreview');
+            const employeePhoto = document.getElementById('employeePhoto');
+            const uploadIcon = document.getElementById('uploadIcon');
+            
+            photoUpload.addEventListener('change', function() {
+                const file = this.files[0];
+                if (file) {
+                    const reader = new FileReader();
+                    reader.onload = function(e) {
+                        employeePhoto.src = e.target.result;
+                        employeePhoto.style.display = 'block';
+                        uploadIcon.style.display = 'none';
+                    };
+                    reader.readAsDataURL(file);
+                }
+            });
+            
+            // Show/hide employee form
+            addEmployeeBtn.addEventListener('click', function() {
+                resetForm();
+                formTitle.textContent = 'Add New Employee';
+                employeeForm.style.display = 'block';
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+                
+                // Set default date to today
+                const today = new Date().toISOString().split('T')[0];
+                document.getElementById('joinDate').value = today;
+            });
+            
+            cancelBtn.addEventListener('click', function() {
+                employeeForm.style.display = 'none';
+            });
+            
+            // Form submission
+            employeeDetailsForm.addEventListener('submit', function(e) {
+                e.preventDefault();
+                
+                // Get form data
+                const employeeData = {
+                    firstName: document.getElementById('firstName').value,
+                    lastName: document.getElementById('lastName').value,
+                    email: document.getElementById('email').value,
+                    phone: document.getElementById('phone').value,
+                    position: document.getElementById('position').value,
+                    joinDate: document.getElementById('joinDate').value,
+                    salary: parseFloat(document.getElementById('salary').value),
+                    paymentType: document.getElementById('paymentType').value,
+                    status: document.getElementById('status').value,
+                    notes: document.getElementById('notes').value
+                };
+                
+                // Add photo if available
+                const photoFile = photoUpload.files[0];
+                if (photoFile) {
+                    // In a real app, we would upload the photo to a server
+                    // For now, we'll just store the photo as a base64 string
+                    const reader = new FileReader();
+                    reader.onload = function(e) {
+                        employeeData.photoUrl = e.target.result;
+                        saveEmployee(employeeData);
+                    };
+                    reader.readAsDataURL(photoFile);
+                } else {
+                    if (employeePhoto.src && employeePhoto.style.display !== 'none') {
+                        employeeData.photoUrl = employeePhoto.src;
+                    }
+                    saveEmployee(employeeData);
+                }
+            });
+            
+            // Save employee function
+            function saveEmployee(employeeData) {
+                const isEditing = currentEmployeeId !== null;
+                const method = isEditing ? 'PUT' : 'POST';
+                const url = isEditing ? `${apiUrl}/employees/${currentEmployeeId}` : `${apiUrl}/employees`;
+                
+                fetch(url, {
+                    method: method,
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'x-access-token': token
+                    },
+                    body: JSON.stringify(employeeData)
+                })
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Failed to save employee');
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    // Show success message
+                    employeeAlert.textContent = isEditing ? 'Employee updated successfully!' : 'Employee added successfully!';
+                    employeeAlert.className = 'alert alert-success';
+                    employeeAlert.style.display = 'block';
+                    
+                    // Reset form and hide it
+                    resetForm();
+                    employeeForm.style.display = 'none';
+                    
+                    // Reload employees
+                    loadEmployees();
+                    loadEmployeeStats();
+                    loadAttendanceEmployeeDropdown();
+                    
+                    // Hide alert after 3 seconds
+                    setTimeout(() => {
+                        employeeAlert.style.display = 'none';
+                    }, 3000);
+                })
+                .catch(error => {
+                    console.error('Error saving employee:', error);
+                    
+                    // Show error message
+                    employeeAlert.textContent = 'Error saving employee: ' + error.message;
+                    employeeAlert.className = 'alert alert-danger';
+                    employeeAlert.style.display = 'block';
+                    
+                    // Hide alert after 3 seconds
+                    setTimeout(() => {
+                        employeeAlert.style.display = 'none';
+                    }, 3000);
+                });
+            }
+            
+            // Search and filter functionality - Employees Tab
+            searchBtn.addEventListener('click', performSearch);
+            searchInput.addEventListener('keyup', function(e) {
+                if (e.key === 'Enter') {
+                    performSearch();
+                }
+            });
+            
+            statusFilter.addEventListener('change', performSearch);
+            resetFilterBtn.addEventListener('click', function() {
+                searchInput.value = '';
+                statusFilter.value = '';
+                loadEmployees();
+            });
+            
+            function performSearch() {
+                const searchTerm = searchInput.value.trim();
+                const status = statusFilter.value;
+                
+                loadEmployees(searchTerm, status);
+            }
+            
+            // Load employees from API
+            function loadEmployees(search = '', status = '') {
+                loadingEmployees.style.display = 'block';
+                noEmployeesMessage.style.display = 'none';
+                employeesTableBody.innerHTML = '';
+                
+                // Build query string
+                let queryParams = [];
+                if (search) queryParams.push(`search=${encodeURIComponent(search)}`);
+                if (status) queryParams.push(`status=${encodeURIComponent(status)}`);
+                
+                const queryString = queryParams.length > 0 ? `?${queryParams.join('&')}` : '';
+                
+                fetch(`${apiUrl}/employees${queryString}`, {
+                    headers: {
+                        'x-access-token': token
+                    }
+                })
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Failed to fetch employees');
+                    }
+                    return response.json();
+                })
+                .then(employees => {
+                    loadingEmployees.style.display = 'none';
+                    
+                    if (employees.length === 0) {
+                        noEmployeesMessage.style.display = 'block';
+                        return;
+                    }
+                    
+                    // Cache employees data
+                    employees.forEach(employee => {
+                        employeesCache[employee.id] = employee;
+                    });
+                    
+                    // Render employees
+                    employees.forEach(employee => {
+                        renderEmployeeRow(employee);
+                    });
+                })
+                .catch(error => {
+                    console.error('Error fetching employees:', error);
+                    loadingEmployees.style.display = 'none';
+                    noEmployeesMessage.style.display = 'block';
+                    noEmployeesMessage.textContent = 'Error loading employees. Please try again.';
+                });
+            }
+            
+            // Load employee statistics
+            function loadEmployeeStats() {
+                fetch(`${apiUrl}/employees/stats`, {
+                    headers: {
+                        'x-access-token': token
+                    }
+                })
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Failed to fetch employee statistics');
+                    }
+                    return response.json();
+                })
+                .then(stats => {
+                    // Update stats display
+                    totalEmployees.textContent = stats.totalEmployees || 0;
+                    todayAttendance.textContent = stats.todayAttendance || 0;
+                    totalForAttendance.textContent = stats.totalActiveEmployees || 0;
+                    monthlySalary.textContent = (stats.monthlySalary || 0).toLocaleString();
+                })
+                .catch(error => {
+                    console.error('Error fetching employee statistics:', error);
+                });
+            }
+            
+            // Render a single employee row
+            function renderEmployeeRow(employee) {
+                const row = document.createElement('tr');
+                
+                // Format join date
+                const joinDate = new Date(employee.joinDate).toLocaleDateString();
+                
+                // Format salary
+                const formattedSalary = `₹${employee.salary.toLocaleString()}/${employee.paymentType.charAt(0)}`;
+                
+                row.innerHTML = `
+                    <td>
+                        <div class="d-flex align-items-center">
+                            ${employee.photoUrl ? 
+                                `<img src="${employee.photoUrl}" class="employee-img-small me-3" alt="${employee.firstName}">` : 
+                                `<div class="avatar me-3">${employee.firstName.charAt(0)}${employee.lastName.charAt(0)}</div>`}
+                            <div>
+                                <div class="fw-bold">${employee.firstName} ${employee.lastName}</div>
+                                <div class="small text-muted">${employee.email || 'No email'}</div>
+                            </div>
+                        </div>
+                    </td>
+                    <td>${employee.position}</td>
+                    <td>${joinDate}</td>
+                    <td>${formattedSalary}</td>
+                    <td><span class="badge badge-status ${employee.status === 'active' ? 'badge-active' : 'badge-inactive'}">${employee.status.toUpperCase()}</span></td>
+                    <td>
+                        <div class="dropdown">
+                            <button class="btn btn-sm btn-outline-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown">
+                                Actions
+                            </button>
+                            <ul class="dropdown-menu">
+                                <li><a class="dropdown-item edit-employee" href="#" data-id="${employee.id}"><i class="bi bi-pencil"></i> Edit</a></li>
+                                <li><a class="dropdown-item delete-employee" href="#" data-id="${employee.id}"><i class="bi bi-trash"></i> Delete</a></li>
+                            </ul>
+                        </div>
+                    </td>
+                `;
+                
+                // Add event listeners to action buttons
+                const editButton = row.querySelector('.edit-employee');
+                const deleteButton = row.querySelector('.delete-employee');
+                
+                editButton.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    editEmployee(employee.id);
+                });
+                
+                deleteButton.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    showDeleteConfirmation(employee.id);
+                });
+                
+                employeesTableBody.appendChild(row);
+            }
+            
+            // Edit employee function
+            function editEmployee(employeeId) {
+                fetch(`${apiUrl}/employees/${employeeId}`, {
+                    headers: {
+                        'x-access-token': token
+                    }
+                })
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Failed to fetch employee details');
+                    }
+                    return response.json();
+                })
+                .then(employee => {
+                    // Set form title
+                    formTitle.textContent = 'Edit Employee';
+                    
+                    // Fill form with employee data
+                    document.getElementById('employeeId').value = employee.id;
+                    document.getElementById('firstName').value = employee.firstName;
+                    document.getElementById('lastName').value = employee.lastName;
+                    document.getElementById('email').value = employee.email || '';
+                    document.getElementById('phone').value = employee.phone || '';
+                    document.getElementById('position').value = employee.position;
+                    document.getElementById('joinDate').value = new Date(employee.joinDate).toISOString().split('T')[0];
+                    document.getElementById('salary').value = employee.salary;
+                    document.getElementById('paymentType').value = employee.paymentType;
+                    document.getElementById('status').value = employee.status;
+                    document.getElementById('notes').value = employee.notes || '';
+                    
+                    // Set photo if available
+                    if (employee.photoUrl) {
+                        employeePhoto.src = employee.photoUrl;
+                        employeePhoto.style.display = 'block';
+                        uploadIcon.style.display = 'none';
+                    } else {
+                        employeePhoto.style.display = 'none';
+                        uploadIcon.style.display = 'block';
+                    }
+                    
+                    // Set current employee ID
+                    currentEmployeeId = employee.id;
+                    
+                    // Show form
+                    employeeForm.style.display = 'block';
+                    window.scrollTo({ top: 0, behavior: 'smooth' });
+                })
+                .catch(error => {
+                    console.error('Error fetching employee details:', error);
+                    alert('Error fetching employee details: ' + error.message);
+                });
+            }
+            
+            // Delete confirmation
+            function showDeleteConfirmation(employeeId) {
+                currentEmployeeId = employeeId;
+                deleteModal.show();
+            }
+            
+            // Confirm delete
+            confirmDeleteBtn.addEventListener('click', function() {
+                if (!currentEmployeeId) return;
+                
+                fetch(`${apiUrl}/employees/${currentEmployeeId}`, {
+                    method: 'DELETE',
+                    headers: {
+                        'x-access-token': token
+                    }
+                })
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Failed to delete employee');
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    // Hide modal
+                    deleteModal.hide();
+                    
+                    // Show success message
+                    employeeAlert.textContent = 'Employee deleted successfully!';
+                    employeeAlert.className = 'alert alert-success';
+                    employeeAlert.style.display = 'block';
+                    
+                    // Reload employees
+                    loadEmployees();
+                    loadEmployeeStats();
+                    loadAttendanceEmployeeDropdown();
+                    
+                    // Reset current employee ID
+                    currentEmployeeId = null;
+                    
+                    // Hide alert after 3 seconds
+                    setTimeout(() => {
+                        employeeAlert.style.display = 'none';
+                    }, 3000);
+                })
+                .catch(error => {
+                    console.error('Error deleting employee:', error);
+                    
+                    // Hide modal
+                    deleteModal.hide();
+                    
+                    // Show error message
+                    employeeAlert.textContent = 'Error deleting employee: ' + error.message;
+                    employeeAlert.className = 'alert alert-danger';
+                    employeeAlert.style.display = 'block';
+                    
+                    // Hide alert after 3 seconds
+                    setTimeout(() => {
+                        employeeAlert.style.display = 'none';
+                    }, 3000);
+                });
+            });
+            
+            // Reset form function
+            function resetForm() {
+                employeeDetailsForm.reset();
+                currentEmployeeId = null;
+                document.getElementById('employeeId').value = '';
+                employeePhoto.style.display = 'none';
+                uploadIcon.style.display = 'block';
+            }
+            
+            /* ATTENDANCE FUNCTIONALITY */
+            
+            // Initialize attendance date inputs
+            const today = new Date();
+            const currentMonth = today.toISOString().slice(0, 7); // YYYY-MM format
+            attendanceMonth.value = currentMonth;
+            attendanceDate.value = today.toISOString().split('T')[0];
+            
+            // Load attendance employee dropdown
+            function loadAttendanceEmployeeDropdown() {
+                fetch(`${apiUrl}/employees?status=active`, {
+                    headers: {
+                        'x-access-token': token
+                    }
+                })
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Failed to fetch employees');
+                    }
+                    return response.json();
+                })
+                .then(employees => {
+                    // Clear current options except the first one
+                    attendanceEmployee.innerHTML = '<option value="">All Employees</option>';
+                    
+                    // Add employee options
+                    employees.forEach(employee => {
+                        const option = document.createElement('option');
+                        option.value = employee.id;
+                        option.textContent = `${employee.firstName} ${employee.lastName}`;
+                        attendanceEmployee.appendChild(option);
+                    });
+                    
+                    // Load attendance calendar
+                    loadAttendanceCalendar();
+                })
+                .catch(error => {
+                    console.error('Error fetching employees for attendance:', error);
+                    alert('Error fetching employees: ' + error.message);
+                });
+            }
+            
+            // Load attendance calendar
+            function loadAttendanceCalendar() {
+                const month = attendanceMonth.value;
+                const employeeId = attendanceEmployee.value;
+                
+                if (!month) return;
+                
+                // Parse month to get year and month number
+                const [year, monthNum] = month.split('-');
+                const monthIndex = parseInt(monthNum) - 1; // Month index is 0-based
+                
+                // Get days in month
+                const daysInMonth = new Date(parseInt(year), parseInt(monthNum), 0).getDate();
+                
+                // Create header with days
+                const headerRow = document.createElement('tr');
+                headerRow.innerHTML = '<th>Employee</th>';
+                
+                for (let day = 1; day <= daysInMonth; day++) {
+                    headerRow.innerHTML += `<th>${day}</th>`;
+                }
+                
+                // Replace existing header
+                const attendanceTable = document.getElementById('attendanceCalendar');
+                attendanceTable.querySelector('thead').innerHTML = '';
+                attendanceTable.querySelector('thead').appendChild(headerRow);
+                
+                // Clear calendar body
+                attendanceCalendarBody.innerHTML = '';
+                
+                // Fetch attendance data
+                fetch(`${apiUrl}/employees/attendance?month=${monthNum}&year=${year}${employeeId ? `&employeeId=${employeeId}` : ''}`, {
+                    headers: {
+                        'x-access-token': token
+                    }
+                })
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Failed to fetch attendance data');
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    if (!data.attendanceData || Object.keys(data.attendanceData).length === 0) {
+                        const noDataRow = document.createElement('tr');
+                        noDataRow.innerHTML = `<td colspan="${daysInMonth + 1}" class="text-center">No attendance data available for this month.</td>`;
+                        attendanceCalendarBody.appendChild(noDataRow);
+                        return;
+                    }
+                    
+                    // Process data and create rows
+                    for (const employeeId in data.attendanceData) {
+                        const employee = data.employeeInfo[employeeId];
+                        const attendanceData = data.attendanceData[employeeId];
+                        
+                        const row = document.createElement('tr');
+                        row.innerHTML = `
+                            <td>
+                                <div class="d-flex align-items-center">
+                                    ${employee.photoUrl ? 
+                                        `<img src="${employee.photoUrl}" class="employee-img-small me-2" alt="${employee.name}">` : 
+                                        `<div class="avatar me-2">${employee.name.split(' ').map(n => n[0]).join('')}</div>`}
+                                    <div>${employee.name}</div>
+                                </div>
+                            </td>
+                        `;
+                        
+                        // Add attendance status for each day
+                        for (let day = 1; day <= daysInMonth; day++) {
+                            const date = `${year}-${monthNum.padStart(2, '0')}-${day.toString().padStart(2, '0')}`;
+                            const attendance = attendanceData[date];
+                            
+                            let statusClass = '';
+                            let statusText = '';
+                            
+                            if (attendance) {
+                                switch(attendance.status) {
+                                    case 'present':
+                                        statusClass = 'present';
+                                        statusText = 'P';
+                                        break;
+                                    case 'absent':
+                                        statusClass = 'absent';
+                                        statusText = 'A';
+                                        break;
+                                    case 'half-day':
+                                        statusClass = 'half-day';
+                                        statusText = 'H';
+                                        break;
+                                    case 'late':
+                                        statusClass = 'late';
+                                        statusText = 'L';
+                                        break;
+                                }
+                            }
+                            
+                            // Check if the day is today
+                            const isToday = date === today.toISOString().split('T')[0];
+                            const todayClass = isToday ? 'today' : '';
+                            
+                            // Check if the day is in the future (disabled)
+                            const checkDate = new Date(date);
+                            const isFuture = checkDate > today;
+                            const disabledClass = isFuture ? 'disabled' : '';
+                            
+                            row.innerHTML += `
+                                <td>
+                                    <div class="calendar-day ${statusClass} ${todayClass} ${disabledClass}" 
+                                         data-employee-id="${employeeId}" 
+                                         data-date="${date}" 
+                                         data-status="${attendance ? attendance.status : ''}">
+                                        ${statusText || day}
+                                    </div>
+                                </td>
+                            `;
+                        }
+                        
+                        attendanceCalendarBody.appendChild(row);
+                    }
+                    
+                    // Add click listeners to calendar days for marking individual attendance
+                    const calendarDays = document.querySelectorAll('.calendar-day:not(.disabled)');
+                    calendarDays.forEach(day => {
+                        day.addEventListener('click', function() {
+                            const employeeId = this.getAttribute('data-employee-id');
+                            const date = this.getAttribute('data-date');
+                            if (employeeId && date) {
+                                markIndividualAttendance(employeeId, date);
+                            }
+                        });
+                    });
+                })
+                .catch(error => {
+                    console.error('Error fetching attendance data:', error);
+                    attendanceCalendarBody.innerHTML = `<tr><td colspan="${daysInMonth + 1}" class="text-center text-danger">Error loading attendance data: ${error.message}</td></tr>`;
+                });
+            }
+            
+            // Mark individual attendance
+            function markIndividualAttendance(employeeId, date) {
+                // Get employee info from cache
+                const employee = employeesCache[employeeId];
+                if (!employee) return;
+                
+                // Fetch current attendance status if any
+                fetch(`${apiUrl}/employees/${employeeId}/attendance?date=${date}`, {
+                    headers: {
+                        'x-access-token': token
+                    }
+                })
+                .then(response => {
+                    if (!response.ok && response.status !== 404) {
+                        throw new Error('Failed to fetch attendance status');
+                    }
+                    return response.status === 404 ? null : response.json();
+                })
+                .then(attendanceData => {
+                    const status = attendanceData ? attendanceData.status : 'present';
+                    const timeIn = attendanceData ? attendanceData.timeIn || '09:00' : '09:00';
+                    const timeOut = attendanceData ? attendanceData.timeOut || '18:00' : '18:00';
+                    const notes = attendanceData ? attendanceData.notes || '' : '';
+                    
+                    // Create a simple form for marking attendance
+                    const markAttendanceForm = `
+                        <div class="card">
+                            <div class="card-body">
+                                <h5 class="card-title">${employee.firstName} ${employee.lastName}</h5>
+                                <p class="card-text">Date: ${new Date(date).toLocaleDateString()}</p>
+                                
+                                <div class="mb-3">
+                                    <label class="form-label">Status</label>
+                                    <div class="d-flex">
+                                        <div class="form-check me-3">
+                                            <input class="form-check-input" type="radio" name="status" id="statusPresent" value="present" ${status === 'present' ? 'checked' : ''}>
+                                            <label class="form-check-label" for="statusPresent">Present</label>
+                                        </div>
+                                        <div class="form-check me-3">
+                                            <input class="form-check-input" type="radio" name="status" id="statusAbsent" value="absent" ${status === 'absent' ? 'checked' : ''}>
+                                            <label class="form-check-label" for="statusAbsent">Absent</label>
+                                        </div>
+                                        <div class="form-check me-3">
+                                            <input class="form-check-input" type="radio" name="status" id="statusHalfDay" value="half-day" ${status === 'half-day' ? 'checked' : ''}>
+                                            <label class="form-check-label" for="statusHalfDay">Half Day</label>
+                                        </div>
+                                        <div class="form-check">
+                                            <input class="form-check-input" type="radio" name="status" id="statusLate" value="late" ${status === 'late' ? 'checked' : ''}>
+                                            <label class="form-check-label" for="statusLate">Late</label>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <div class="row mb-3" id="timeInputs" ${status === 'absent' ? 'style="display: none;"' : ''}>
+                                    <div class="col-md-6">
+                                        <label for="timeIn" class="form-label">Time In</label>
+                                        <input type="time" class="form-control" id="timeIn" value="${timeIn}">
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label for="timeOut" class="form-label">Time Out</label>
+                                        <input type="time" class="form-control" id="timeOut" value="${timeOut}">
+                                    </div>
+                                </div>
+                                
+                                <div class="mb-3">
+                                    <label for="attendanceNotes" class="form-label">Notes</label>
+                                    <textarea class="form-control" id="attendanceNotes" rows="2">${notes}</textarea>
+                                </div>
+                                
+                                <div class="d-flex justify-content-end">
+                                    <button type="button" class="btn btn-secondary me-2" id="cancelAttendanceBtn">Cancel</button>
+                                    <button type="button" class="btn btn-primary" id="saveIndividualAttendanceBtn">Save</button>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                    
+                    // Show the form in a container
+                    const formContainer = document.createElement('div');
+                    formContainer.id = 'individualAttendanceForm';
+                    formContainer.style.position = 'fixed';
+                    formContainer.style.top = '50%';
+                    formContainer.style.left = '50%';
+                    formContainer.style.transform = 'translate(-50%, -50%)';
+                    formContainer.style.zIndex = '1050';
+                    formContainer.style.width = '500px';
+                    formContainer.style.maxWidth = '90%';
+                    
+                    formContainer.innerHTML = markAttendanceForm;
+                    document.body.appendChild(formContainer);
+                    
+                    // Add overlay
+                    const overlay = document.createElement('div');
+                    overlay.id = 'attendanceOverlay';
+                    overlay.style.position = 'fixed';
+                    overlay.style.top = '0';
+                    overlay.style.left = '0';
+                    overlay.style.width = '100%';
+                    overlay.style.height = '100%';
+                    overlay.style.backgroundColor = 'rgba(0, 0, 0, 0.5)';
+                    overlay.style.zIndex = '1040';
+                    document.body.appendChild(overlay);
+                    
+                    // Add event listeners
+                    document.getElementById('cancelAttendanceBtn').addEventListener('click', function() {
+                        document.body.removeChild(formContainer);
+                        document.body.removeChild(overlay);
+                    });
+                    
+                    // Toggle time inputs based on status
+                    document.querySelectorAll('input[name="status"]').forEach(radio => {
+                        radio.addEventListener('change', function() {
+                            const timeInputs = document.getElementById('timeInputs');
+                            if (this.value === 'absent') {
+                                timeInputs.style.display = 'none';
+                            } else {
+                                timeInputs.style.display = 'flex';
+                            }
+                        });
+                    });
+                    
+                    document.getElementById('saveIndividualAttendanceBtn').addEventListener('click', function() {
+                        const status = document.querySelector('input[name="status"]:checked').value;
+                        const timeIn = document.getElementById('timeIn').value;
+                        const timeOut = document.getElementById('timeOut').value;
+                        const notes = document.getElementById('attendanceNotes').value;
+                        
+                        const attendanceData = {
+                            employeeId: parseInt(employeeId),
+                            date: date,
+                            status: status,
+                            timeIn: status !== 'absent' ? timeIn : null,
+                            timeOut: status !== 'absent' ? timeOut : null,
+                            notes: notes
+                        };
+                        
+                        fetch(`${apiUrl}/employees/${employeeId}/attendance`, {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                                'x-access-token': token
+                            },
+                            body: JSON.stringify(attendanceData)
+                        })
+                        .then(response => {
+                            if (!response.ok) {
+                                throw new Error('Failed to save attendance');
+                            }
+                            return response.json();
+                        })
+                        .then(data => {
+                            // Remove form and overlay
+                            document.body.removeChild(formContainer);
+                            document.body.removeChild(overlay);
+                            
+                            // Show success message
+                            employeeAlert.textContent = 'Attendance marked successfully!';
+                            employeeAlert.className = 'alert alert-success';
+                            employeeAlert.style.display = 'block';
+                            
+                            // Reload attendance calendar
+                            loadAttendanceCalendar();
+                            loadEmployeeStats();
+                            
+                            // Hide alert after 3 seconds
+                            setTimeout(() => {
+                                employeeAlert.style.display = 'none';
+                            }, 3000);
+                        })
+                        .catch(error => {
+                            console.error('Error saving attendance:', error);
+                            alert('Error saving attendance: ' + error.message);
+                        });
+                    });
+                })
+                .catch(error => {
+                    console.error('Error fetching attendance status:', error);
+                    alert('Error fetching attendance status: ' + error.message);
+                });
+            }
+            
+            // Mark attendance for multiple employees
+            markAttendanceBtn.addEventListener('click', function() {
+                // Set default date to today
+                attendanceDate.value = today.toISOString().split('T')[0];
+                
+                // Fetch active employees
+                fetch(`${apiUrl}/employees?status=active`, {
+                    headers: {
+                        'x-access-token': token
+                    }
+                })
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Failed to fetch employees');
+                    }
+                    return response.json();
+                })
+                .then(employees => {
+                    // Clear table
+                    markAttendanceTableBody.innerHTML = '';
+                    
+                    // Add a row for each employee
+                    employees.forEach(employee => {
+                        const row = document.createElement('tr');
+                        row.dataset.employeeId = employee.id;
+                        
+                        row.innerHTML = `
+                            <td>
+                                <div class="d-flex align-items-center">
+                                    ${employee.photoUrl ? 
+                                        `<img src="${employee.photoUrl}" class="employee-img-small me-2" alt="${employee.firstName}">` : 
+                                        `<div class="avatar me-2">${employee.firstName.charAt(0)}${employee.lastName.charAt(0)}</div>`}
+                                    <div>${employee.firstName} ${employee.lastName}</div>
+                                </div>
+                            </td>
+                            <td>
+                                <select class="form-select status-select">
+                                    <option value="present">Present</option>
+                                    <option value="absent">Absent</option>
+                                    <option value="half-day">Half Day</option>
+                                    <option value="late">Late</option>
+                                </select>
+                            </td>
+                            <td>
+                                <input type="time" class="form-control time-in" value="09:00">
+                            </td>
+                            <td>
+                                <input type="time" class="form-control time-out" value="18:00">
+                            </td>
+                            <td>
+                                <input type="text" class="form-control notes" placeholder="Optional notes">
+                            </td>
+                        `;
+                        
+                        // Add status change listener
+                        const statusSelect = row.querySelector('.status-select');
+                        const timeIn = row.querySelector('.time-in');
+                        const timeOut = row.querySelector('.time-out');
+                        
+                        statusSelect.addEventListener('change', function() {
+                            if (this.value === 'absent') {
+                                timeIn.disabled = true;
+                                timeOut.disabled = true;
+                            } else {
+                                timeIn.disabled = false;
+                                timeOut.disabled = false;
+                            }
+                        });
+                        
+                        markAttendanceTableBody.appendChild(row);
+                    });
+                    
+                    // Show modal
+                    attendanceModal.show();
+                })
+                .catch(error => {
+                    console.error('Error fetching employees for attendance:', error);
+                    alert('Error fetching employees: ' + error.message);
+                });
+            });
+            
+            // Save attendance for multiple employees
+            saveAttendanceBtn.addEventListener('click', function() {
+                const date = attendanceDate.value;
+                if (!date) {
+                    alert('Please select a date.');
+                    return;
+                }
+                
+                const attendanceData = [];
+                
+                // Collect data from each row
+                const rows = markAttendanceTableBody.querySelectorAll('tr');
+                rows.forEach(row => {
+                    const employeeId = row.dataset.employeeId;
+                    const status = row.querySelector('.status-select').value;
+                    const timeIn = row.querySelector('.time-in').value;
+                    const timeOut = row.querySelector('.time-out').value;
+                    const notes = row.querySelector('.notes').value;
+                    
+                    attendanceData.push({
+                        employeeId: parseInt(employeeId),
+                        date: date,
+                        status: status,
+                        timeIn: status !== 'absent' ? timeIn : null,
+                        timeOut: status !== 'absent' ? timeOut : null,
+                        notes: notes
+                    });
+                });
+                
+                // Save attendance for all employees
+                fetch(`${apiUrl}/employees/attendance/bulk`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'x-access-token': token
+                    },
+                    body: JSON.stringify({ attendanceData })
+                })
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Failed to save attendance');
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    // Hide modal
+                    attendanceModal.hide();
+                    
+                    // Show success message
+                    employeeAlert.textContent = 'Attendance marked successfully!';
+                    employeeAlert.className = 'alert alert-success';
+                    employeeAlert.style.display = 'block';
+                    
+                    // Reload attendance calendar if the month matches
+                    if (date.substring(0, 7) === attendanceMonth.value) {
+                        loadAttendanceCalendar();
+                    }
+                    
+                    // Update stats
+                    loadEmployeeStats();
+                    
+                    // Hide alert after 3 seconds
+                    setTimeout(() => {
+                        employeeAlert.style.display = 'none';
+                    }, 3000);
+                })
+                .catch(error => {
+                    console.error('Error saving attendance:', error);
+                    
+                    // Hide modal
+                    attendanceModal.hide();
+                    
+                    // Show error message
+                    employeeAlert.textContent = 'Error saving attendance: ' + error.message;
+                    employeeAlert.className = 'alert alert-danger';
+                    employeeAlert.style.display = 'block';
+                    
+                    // Hide alert after 3 seconds
+                    setTimeout(() => {
+                        employeeAlert.style.display = 'none';
+                    }, 3000);
+                });
+            });
+            
+            // Reload attendance calendar when month or employee changes
+            attendanceMonth.addEventListener('change', loadAttendanceCalendar);
+            attendanceEmployee.addEventListener('change', loadAttendanceCalendar);
+            
+            /* SALARY FUNCTIONALITY */
+            
+            // Load salary data
+            function loadSalaryData(search = '') {
+                loadingSalary.style.display = 'block';
+                noSalaryMessage.style.display = 'none';
+                salaryTableBody.innerHTML = '';
+                
+                // Build query string
+                let queryParams = search ? `?search=${encodeURIComponent(search)}` : '';
+                
+                fetch(`${apiUrl}/employees/salary${queryParams}`, {
+                    headers: {
+                        'x-access-token': token
+                    }
+                })
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Failed to fetch salary data');
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    loadingSalary.style.display = 'none';
+                    
+                    if (!data.employees || data.employees.length === 0) {
+                        noSalaryMessage.style.display = 'block';
+                        return;
+                    }
+                    
+                    // Render salary rows
+                    data.employees.forEach(employee => {
+                        renderSalaryRow(employee, data.lastPayments[employee.id]);
+                    });
+                })
+                .catch(error => {
+                    console.error('Error fetching salary data:', error);
+                    loadingSalary.style.display = 'none';
+                    noSalaryMessage.style.display = 'block';
+                    noSalaryMessage.textContent = 'Error loading salary data. Please try again.';
+                });
+            }
+            
+            // Render a single salary row
+            function renderSalaryRow(employee, lastPayment) {
+                const row = document.createElement('tr');
+                row.dataset.employeeId = employee.id;
+                
+                // Format salary
+                const formattedSalary = `₹${employee.salary.toLocaleString()}`;
+                
+                // Format payment type
+                let paymentType = '';
+                switch(employee.paymentType) {
+                    case 'daily':
+                        paymentType = 'Daily';
+                        break;
+                    case 'weekly':
+                        paymentType = 'Weekly';
+                        break;
+                    case 'monthly':
+                        paymentType = 'Monthly';
+                        break;
+                }
+                
+                // Format last payment
+                let lastPaymentDate = 'Never';
+                let paymentStatus = 'Pending';
+                let statusClass = 'bg-danger';
+                
+                if (lastPayment) {
+                    lastPaymentDate = new Date(lastPayment.paymentDate).toLocaleDateString();
+                    
+                    const today = new Date();
+                    const lastPaymentTime = new Date(lastPayment.paymentDate).getTime();
+                    
+                    // Determine status based on payment type and last payment date
+                    if (employee.paymentType === 'daily') {
+                        const yesterday = new Date(today);
+                        yesterday.setDate(yesterday.getDate() - 1);
+                        
+                        if (lastPaymentTime >= yesterday.setHours(0, 0, 0, 0)) {
+                            paymentStatus = 'Paid';
+                            statusClass = 'bg-success';
+                        }
+                    } else if (employee.paymentType === 'weekly') {
+                        const lastWeek = new Date(today);
+                        lastWeek.setDate(lastWeek.getDate() - 7);
+                        
+                        if (lastPaymentTime >= lastWeek.setHours(0, 0, 0, 0)) {
+                            paymentStatus = 'Paid';
+                            statusClass = 'bg-success';
+                        }
+                    } else if (employee.paymentType === 'monthly') {
+                        const lastMonth = new Date(today);
+                        lastMonth.setMonth(lastMonth.getMonth() - 1);
+                        
+                        if (lastPaymentTime >= lastMonth.setHours(0, 0, 0, 0)) {
+                            paymentStatus = 'Paid';
+                            statusClass = 'bg-success';
+                        }
+                    }
+                }
+                
+                row.innerHTML = `
+                    <td>
+                        <div class="d-flex align-items-center">
+                            ${employee.photoUrl ? 
+                                `<img src="${employee.photoUrl}" class="employee-img-small me-2" alt="${employee.firstName}">` : 
+                                `<div class="avatar me-2">${employee.firstName.charAt(0)}${employee.lastName.charAt(0)}</div>`}
+                            <div>${employee.firstName} ${employee.lastName}</div>
+                        </div>
+                    </td>
+                    <td>${employee.position}</td>
+                    <td>${formattedSalary}</td>
+                    <td>${paymentType}</td>
+                    <td>${lastPaymentDate}</td>
+                    <td><span class="badge ${statusClass} rounded-pill">${paymentStatus}</span></td>
+                    <td>
+                        <div class="dropdown">
+                            <button class="btn btn-sm btn-outline-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown">
+                                Actions
+                            </button>
+                            <ul class="dropdown-menu">
+                                <li><a class="dropdown-item pay-salary" href="#" data-id="${employee.id}"><i class="bi bi-cash"></i> Pay Salary</a></li>
+                                <li><a class="dropdown-item view-history" href="#" data-id="${employee.id}"><i class="bi bi-clock-history"></i> View History</a></li>
+                            </ul>
+                        </div>
+                    </td>
+                `;
+                
+                // Add event listeners to action buttons
+                const paySalaryButton = row.querySelector('.pay-salary');
+                const viewHistoryButton = row.querySelector('.view-history');
+                
+                paySalaryButton.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    paySalary(employee.id);
+                });
+                
+                viewHistoryButton.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    viewSalaryHistory(employee.id);
+                });
+                
+                salaryTableBody.appendChild(row);
+            }
+            
+            // Pay individual salary
+            function paySalary(employeeId) {
+                // Get employee from cache
+                const employee = employeesCache[employeeId];
+                if (!employee) return;
+                
+                // Create a modal for paying salary
+                const paySalaryForm = `
+                    <div class="modal fade" id="paySalaryModal" tabindex="-1" aria-labelledby="paySalaryModalLabel" aria-hidden="true">
+                        <div class="modal-dialog">
+                            <div class="modal-content">
+                                <div class="modal-header">
+                                    <h5 class="modal-title" id="paySalaryModalLabel">Pay Salary</h5>
+                                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                </div>
+                                <div class="modal-body">
+                                    <div class="mb-3">
+                                        <h6>${employee.firstName} ${employee.lastName}</h6>
+                                        <p class="text-muted">${employee.position}</p>
+                                    </div>
+                                    
+                                    <div class="mb-3">
+                                        <label for="salaryAmount" class="form-label">Salary Amount (₹)</label>
+                                        <input type="number" class="form-control" id="salaryAmount" value="${employee.salary}">
+                                    </div>
+                                    
+                                    <div class="mb-3">
+                                        <label for="paymentDate" class="form-label">Payment Date</label>
+                                        <input type="date" class="form-control" id="singlePaymentDate" value="${today.toISOString().split('T')[0]}">
+                                    </div>
+                                    
+                                    <div class="mb-3">
+                                        <label for="paymentMethod" class="form-label">Payment Method</label>
+                                        <select class="form-select" id="paymentMethod">
+                                            <option value="cash">Cash</option>
+                                            <option value="bank">Bank Transfer</option>
+                                            <option value="check">Check</option>
+                                            <option value="upi">UPI</option>
+                                        </select>
+                                    </div>
+                                    
+                                    <div class="mb-3">
+                                        <label for="paymentNotes" class="form-label">Notes</label>
+                                        <textarea class="form-control" id="paymentNotes" rows="3"></textarea>
+                                    </div>
+                                </div>
+                                <div class="modal-footer">
+                                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                                    <button type="button" class="btn btn-primary" id="confirmPaySalaryBtn">Pay Salary</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+                
+                // Add modal to page
+                const modalContainer = document.createElement('div');
+                modalContainer.innerHTML = paySalaryForm;
+                document.body.appendChild(modalContainer);
+                
+                // Show modal
+                const paySalaryModal = new bootstrap.Modal(document.getElementById('paySalaryModal'));
+                paySalaryModal.show();
+                
+                // Confirm payment
+                document.getElementById('confirmPaySalaryBtn').addEventListener('click', function() {
+                    const amount = parseFloat(document.getElementById('salaryAmount').value);
+                    const paymentDate = document.getElementById('singlePaymentDate').value;
+                    const paymentMethod = document.getElementById('paymentMethod').value;
+                    const notes = document.getElementById('paymentNotes').value;
+                    
+                    // Validate input
+                    if (!amount || amount <= 0) {
+                        alert('Please enter a valid salary amount.');
+                        return;
+                    }
+                    
+                    if (!paymentDate) {
+                        alert('Please select a payment date.');
+                        return;
+                    }
+                    
+                    // Get month and year from payment date
+                    const paymentDateObj = new Date(paymentDate);
+                    const month = paymentDateObj.getMonth() + 1; // Month is 0-indexed
+                    const year = paymentDateObj.getFullYear();
+                    
+                    // Create salary payment data
+                    const salaryData = {
+                        employeeId: parseInt(employeeId),
+                        amount: amount,
+                        month: month,
+                        year: year,
+                        paymentDate: paymentDate,
+                        paymentMethod: paymentMethod,
+                        notes: notes
+                    };
+                    
+                    // Save salary payment
+                    fetch(`${apiUrl}/employees/${employeeId}/salary`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'x-access-token': token
+                        },
+                        body: JSON.stringify(salaryData)
+                    })
+                    .then(response => {
+                        if (!response.ok) {
+                            throw new Error('Failed to save salary payment');
+                        }
+                        return response.json();
+                    })
+                    .then(data => {
+                        // Hide modal
+                        paySalaryModal.hide();
+                        document.body.removeChild(modalContainer);
+                        
+                        // Show success message
+                        employeeAlert.textContent = 'Salary payment recorded successfully!';
+                        employeeAlert.className = 'alert alert-success';
+                        employeeAlert.style.display = 'block';
+                        
+                        // Reload salary data
+                        loadSalaryData();
+                        loadEmployeeStats();
+                        
+                        // Hide alert after 3 seconds
+                        setTimeout(() => {
+                            employeeAlert.style.display = 'none';
+                        }, 3000);
+                    })
+                    .catch(error => {
+                        console.error('Error saving salary payment:', error);
+                        
+                        // Hide modal
+                        paySalaryModal.hide();
+                        document.body.removeChild(modalContainer);
+                        
+                        // Show error message
+                        employeeAlert.textContent = 'Error saving salary payment: ' + error.message;
+                        employeeAlert.className = 'alert alert-danger';
+                        employeeAlert.style.display = 'block';
+                        
+                        // Hide alert after 3 seconds
+                        setTimeout(() => {
+                            employeeAlert.style.display = 'none';
+                        }, 3000);
+                    });
+                });
+                
+                // Remove modal when hidden
+                document.getElementById('paySalaryModal').addEventListener('hidden.bs.modal', function() {
+                    document.body.removeChild(modalContainer);
+                });
+            }
+            
+            // View salary history
+            function viewSalaryHistory(employeeId) {
+                // Get employee from cache
+                const employee = employeesCache[employeeId];
+                if (!employee) return;
+                
+                // Set employee info in modal
+                salaryHistoryEmployeeInfo.innerHTML = `
+                    <h6 class="employee-name">${employee.firstName} ${employee.lastName}</h6>
+                    <p class="employee-position">${employee.position}</p>
+                `;
+                
+                // Clear table and show loading
+                salaryHistoryTableBody.innerHTML = '';
+                loadingSalaryHistory.style.display = 'block';
+                noSalaryHistoryMessage.style.display = 'none';
+                
+                // Fetch salary history
+                fetch(`${apiUrl}/employees/${employeeId}/salary`, {
+                    headers: {
+                        'x-access-token': token
+                    }
+                })
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Failed to fetch salary history');
+                    }
+                    return response.json();
+                })
+                .then(salaryHistory => {
+                    loadingSalaryHistory.style.display = 'none';
+                    
+                    if (!salaryHistory || salaryHistory.length === 0) {
+                        noSalaryHistoryMessage.style.display = 'block';
+                        return;
+                    }
+                    
+                    // Sort salary history by payment date (newest first)
+                    salaryHistory.sort((a, b) => new Date(b.paymentDate) - new Date(a.paymentDate));
+                    
+                    // Render salary history
+                    salaryHistory.forEach(payment => {
+                        const row = document.createElement('tr');
+                        
+                        // Format payment date
+                        const paymentDate = new Date(payment.paymentDate).toLocaleDateString();
+                        
+                        // Format period
+                        const monthNames = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
+                        const period = `${monthNames[payment.month - 1]} ${payment.year}`;
+                        
+                        // Format payment method
+                        let paymentMethod = payment.paymentMethod || '';
+                        paymentMethod = paymentMethod.charAt(0).toUpperCase() + paymentMethod.slice(1);
+                        
+                        row.innerHTML = `
+                            <td>${paymentDate}</td>
+                            <td>${period}</td>
+                            <td>₹${payment.amount.toLocaleString()}</td>
+                            <td>${paymentMethod}</td>
+                            <td>${payment.notes || '-'}</td>
+                        `;
+                        
+                        salaryHistoryTableBody.appendChild(row);
+                    });
+                })
+                .catch(error => {
+                    console.error('Error fetching salary history:', error);
+                    loadingSalaryHistory.style.display = 'none';
+                    noSalaryHistoryMessage.style.display = 'block';
+                    noSalaryHistoryMessage.textContent = 'Error loading salary history: ' + error.message;
+                })
+                .finally(() => {
+                    // Show modal
+                    salaryHistoryModal.show();
+                });
+            }
+            
+            // Process multiple salary payments
+            processSalaryBtn.addEventListener('click', function() {
+                // Set default values
+                const today = new Date();
+                const currentMonth = today.toISOString().slice(0, 7); // YYYY-MM format
+                
+                paymentMonth.value = currentMonth;
+                paymentDate.value = today.toISOString().split('T')[0];
+                
+                // Fetch active employees
+                fetch(`${apiUrl}/employees?status=active`, {
+                    headers: {
+                        'x-access-token': token
+                    }
+                })
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Failed to fetch employees');
+                    }
+                    return response.json();
+                })
+                .then(employees => {
+                    // Clear table
+                    processSalaryTableBody.innerHTML = '';
+                    
+                    // Add a row for each employee
+                    employees.forEach(employee => {
+                        const row = document.createElement('tr');
+                        row.dataset.employeeId = employee.id;
+                        
+                        row.innerHTML = `
+                            <td>
+                                <div class="form-check">
+                                    <input class="form-check-input employee-checkbox" type="checkbox" value="${employee.id}">
+                                </div>
+                            </td>
+                            <td>
+                                <div class="d-flex align-items-center">
+                                    ${employee.photoUrl ? 
+                                        `<img src="${employee.photoUrl}" class="employee-img-small me-2" alt="${employee.firstName}">` : 
+                                        `<div class="avatar me-2">${employee.firstName.charAt(0)}${employee.lastName.charAt(0)}</div>`}
+                                    <div>${employee.firstName} ${employee.lastName}</div>
+                                </div>
+                            </td>
+                            <td>₹${employee.salary.toLocaleString()}</td>
+                            <td>30/30 days</td>
+                            <td>
+                                <input type="number" class="form-control final-amount" value="${employee.salary}">
+                            </td>
+                            <td>
+                                <select class="form-select payment-method">
+                                    <option value="cash">Cash</option>
+                                    <option value="bank">Bank Transfer</option>
+                                    <option value="check">Check</option>
+                                    <option value="upi">UPI</option>
+                                </select>
+                            </td>
+                        `;
+                        
+                        processSalaryTableBody.appendChild(row);
+                    });
+                    
+                    // Show modal
+                    processSalaryModal.show();
+                })
+                .catch(error => {
+                    console.error('Error fetching employees for salary processing:', error);
+                    alert('Error fetching employees: ' + error.message);
+                });
+            });
+            
+            // Select all employees checkbox
+            selectAllEmployees.addEventListener('change', function() {
+                const checkboxes = document.querySelectorAll('.employee-checkbox');
+                checkboxes.forEach(checkbox => {
+                    checkbox.checked = this.checked;
+                });
+            });
+            
+            // Process selected salary payments
+            confirmSalaryBtn.addEventListener('click', function() {
+                const selectedEmployees = document.querySelectorAll('.employee-checkbox:checked');
+                
+                if (selectedEmployees.length === 0) {
+                    alert('Please select at least one employee.');
+                    return;
+                }
+                
+                const month = paymentMonth.value;
+                const paymentDateVal = paymentDate.value;
+                
+                if (!month || !paymentDateVal) {
+                    alert('Please select a month and payment date.');
+                    return;
+                }
+                
+                // Parse month to get year and month number
+                const [year, monthNum] = month.split('-');
+                
+                // Create salary payment data
+                const salaryPayments = [];
+                
+                selectedEmployees.forEach(checkbox => {
+                    const employeeId = parseInt(checkbox.value);
+                    const row = checkbox.closest('tr');
+                    const amount = parseFloat(row.querySelector('.final-amount').value);
+                    const paymentMethod = row.querySelector('.payment-method').value;
+                    
+                    salaryPayments.push({
+                        employeeId: employeeId,
+                        amount: amount,
+                        month: parseInt(monthNum),
+                        year: parseInt(year),
+                        paymentDate: paymentDateVal,
+                        paymentMethod: paymentMethod,
+                        notes: `Salary for ${month}`
+                    });
+                });
+                
+                // Save salary payments
+                fetch(`${apiUrl}/employees/salary/bulk`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'x-access-token': token
+                    },
+                    body: JSON.stringify({ salaryPayments })
+                })
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Failed to process salary payments');
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    // Hide modal
+                    processSalaryModal.hide();
+                    
+                    // Show success message
+                    employeeAlert.textContent = 'Salary payments processed successfully!';
+                    employeeAlert.className = 'alert alert-success';
+                    employeeAlert.style.display = 'block';
+                    
+                    // Reload salary data
+                    loadSalaryData();
+                    loadEmployeeStats();
+                    
+                    // Hide alert after 3 seconds
+                    setTimeout(() => {
+                        employeeAlert.style.display = 'none';
+                    }, 3000);
+                })
+                .catch(error => {
+                    console.error('Error processing salary payments:', error);
+                    
+                    // Hide modal
+                    processSalaryModal.hide();
+                    
+                    // Show error message
+                    employeeAlert.textContent = 'Error processing salary payments: ' + error.message;
+                    employeeAlert.className = 'alert alert-danger';
+                    employeeAlert.style.display = 'block';
+                    
+                    // Hide alert after 3 seconds
+                    setTimeout(() => {
+                        employeeAlert.style.display = 'none';
+                    }, 3000);
+                });
+            });
+            
+            // Search functionality for salary tab
+            salarysearchBtn.addEventListener('click', function() {
+                const searchTerm = salarysearchInput.value.trim();
+                loadSalaryData(searchTerm);
+            });
+            
+            salarysearchInput.addEventListener('keyup', function(e) {
+                if (e.key === 'Enter') {
+                    const searchTerm = salarysearchInput.value.trim();
+                    loadSalaryData(searchTerm);
+                }
+            });
+            
+            // Tab change event
+            document.querySelectorAll('#employeeTabs button').forEach(button => {
+                button.addEventListener('click', function(e) {
+                    const tabId = this.getAttribute('data-bs-target');
+                    
+                    // Check which tab is active
+                    if (tabId === '#attendance') {
+                        // Load attendance calendar
+                        loadAttendanceCalendar();
+                    } else if (tabId === '#salary') {
+                        // Load salary data
+                        loadSalaryData();
+                    }
+                });
+            });
+            
+            // Initial load
+            loadEmployees();
+            loadEmployeeStats();
+            loadAttendanceEmployeeDropdown();
+            
+            // For demo purposes, add some example employees if none exist
+            // In a real application, you would remove this code
+            /*
+            setTimeout(() => {
+                if (employeesTableBody.children.length === 0) {
+                    const today = new Date();
+                    const exampleEmployees = [
+                        {
+                            id: 1,
+                            firstName: 'Rahul',
+                            lastName: 'Sharma',
+                            email: 'rahul.sharma@example.com',
+                            phone: '9876543210',
+                            position: 'Sales Executive',
+                            joinDate: today,
+                            salary: 25000,
+                            paymentType: 'monthly',
+                            status: 'active'
+                        },
+                        {
+                            id: 2,
+                            firstName: 'Priya',
+                            lastName: 'Patel',
+                            email: 'priya.patel@example.com',
+                            phone: '9876543211',
+                            position: 'Inventory Manager',
+                            joinDate: today,
+                            salary: 30000,
+                            paymentType: 'monthly',
+                            status: 'active'
+                        },
+                        {
+                            id: 3,
+                            firstName: 'Amit',
+                            lastName: 'Singh',
+                            email: 'amit.singh@example.com',
+                            phone: '9876543212',
+                            position: 'Cashier',
+                            joinDate: today,
+                            salary: 18000,
+                            paymentType: 'monthly',
+                            status: 'active'
+                        }
+                    ];
+                    
+                    loadingEmployees.style.display = 'none';
+                    
+                    exampleEmployees.forEach(employee => {
+                        renderEmployeeRow(employee);
+                    });
+                    
+                    // Update stats
+                    totalEmployees.textContent = '3';
+                    todayAttendance.textContent = '3';
+                    totalForAttendance.textContent = '3';
+                    monthlySalary.textContent = '73,000';
+                }
+            }, 1000);
+            */
+        });
+    </script>
+</body>
+</html>

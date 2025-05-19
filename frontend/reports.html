@@ -5,6 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Reports - ReSellPro</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
@@ -17,33 +19,60 @@
             font-weight: bold;
             color: #ffffff;
         }
-        .report-card {
-            border: none;
-            border-radius: 10px;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
-            transition: transform 0.3s;
-            margin-bottom: 20px;
-        }
-        .report-card:hover {
-            transform: translateY(-5px);
-        }
-        .report-icon {
-            font-size: 2.5rem;
-            margin-bottom: 15px;
-            color: #4a6bdf;
-        }
-        .date-filter {
-            margin-bottom: 30px;
-            padding: 20px;
-            border-radius: 10px;
+        .sidebar {
+            position: fixed;
+            top: 56px;
+            bottom: 0;
+            left: 0;
+            z-index: 100;
+            padding: 0;
+            box-shadow: inset -1px 0 0 rgba(0, 0, 0, .1);
             background-color: #fff;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+            width: 250px;
+            transition: all 0.3s;
         }
-        footer {
-            background-color: #343a40;
-            color: #ffffff;
-            padding: 30px 0;
-            margin-top: 50px;
+        .sidebar .nav-link {
+            color: #333;
+            padding: 12px 20px;
+            margin-bottom: 5px;
+            border-radius: 0;
+            transition: all 0.3s;
+        }
+        .sidebar .nav-link:hover, .sidebar .nav-link.active {
+            color: #4a6bdf;
+            background-color: #f8f9fa;
+            border-left: 3px solid #4a6bdf;
+            padding-left: 17px;
+        }
+        .sidebar .nav-link i {
+            margin-right: 10px;
+            width: 20px;
+            text-align: center;
+        }
+        .main-content {
+            margin-left: 250px;
+            padding: 20px;
+            transition: all 0.3s;
+        }
+        @media (max-width: 768px) {
+            .sidebar {
+                margin-left: -250px;
+            }
+            .sidebar.active {
+                margin-left: 0;
+            }
+            .main-content {
+                margin-left: 0;
+            }
+            .main-content.active {
+                margin-left: 250px;
+            }
+        }
+        .card {
+            border-radius: 10px;
+            border: none;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+            margin-bottom: 20px;
         }
         .btn-primary {
             background-color: #4a6bdf;
@@ -53,648 +82,1689 @@
             background-color: #3a5ac7;
             border-color: #3a5ac7;
         }
-        #reportContent {
-            overflow-x: auto;
+        .btn-outline-primary {
+            color: #4a6bdf;
+            border-color: #4a6bdf;
         }
-        .loading {
+        .btn-outline-primary:hover {
+            background-color: #4a6bdf;
+            color: white;
+        }
+        .avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background-color: #4a6bdf;
+            color: white;
             display: flex;
-            justify-content: center;
             align-items: center;
-            min-height: 200px;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 16px;
         }
-        .spinner-border {
-            width: 3rem;
-            height: 3rem;
+        .dropdown-toggle::after {
+            display: none;
+        }
+        .report-card {
+            cursor: pointer;
+            transition: transform 0.3s;
+        }
+        .report-card:hover {
+            transform: translateY(-5px);
+        }
+        .report-icon {
+            font-size: 2.5rem;
+            color: #4a6bdf;
+            margin-bottom: 15px;
+        }
+        .nav-tabs .nav-link {
+            border: none;
+            color: #6c757d;
+            font-weight: 500;
+            padding: 15px 20px;
+        }
+        .nav-tabs .nav-link.active {
+            border-bottom: 3px solid #4a6bdf;
+            color: #4a6bdf;
+            font-weight: 600;
+            background-color: transparent;
+        }
+        .nav-tabs .nav-link:hover {
+            border-color: transparent;
+            color: #4a6bdf;
+        }
+        .filter-section {
+            background-color: #f8f9fa;
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+        }
+        .chart-container {
+            position: relative;
+            height: 300px;
+            width: 100%;
+        }
+        .summary-card {
+            border-radius: 10px;
+            padding: 15px;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            color: white;
+        }
+        .summary-title {
+            font-size: 0.9rem;
+            opacity: 0.9;
+        }
+        .summary-value {
+            font-size: 1.8rem;
+            font-weight: bold;
+            margin: 5px 0;
+        }
+        .summary-subtitle {
+            font-size: 0.8rem;
+            opacity: 0.8;
+        }
+        .bg-sales {
+            background-color: #4a6bdf;
+        }
+        .bg-expenses {
+            background-color: #ff6b6b;
+        }
+        .bg-profit {
+            background-color: #20c997;
+        }
+        .bg-inventory {
+            background-color: #fd7e14;
+        }
+        .date-range {
+            font-size: 1.2rem;
+            font-weight: bold;
+            margin-bottom: 20px;
+        }
+        .date-nav {
+            cursor: pointer;
+        }
+        .date-nav:hover {
+            color: #4a6bdf;
+        }
+        .inventory-badge {
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 500;
+        }
+        .badge-low-stock {
+            background-color: #fff3e0;
+            color: #e65100;
+        }
+        .badge-out-of-stock {
+            background-color: #ffebee;
+            color: #c62828;
+        }
+        .badge-in-stock {
+            background-color: #e3fcef;
+            color: #00a854;
+        }
+        .table-responsive {
+            border-radius: 10px;
+            overflow: hidden;
         }
     </style>
 </head>
 <body>
-    <nav class="navbar navbar-expand-lg navbar-dark">
-        <div class="container">
-            <a class="navbar-brand" href="index.html">ReSellPro</a>
-            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+    <!-- Top Navigation -->
+    <nav class="navbar navbar-expand-lg navbar-dark sticky-top">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="#">ReSellPro</a>
+            <button class="navbar-toggler" type="button" id="sidebarToggle">
                 <span class="navbar-toggler-icon"></span>
             </button>
+            
             <div class="collapse navbar-collapse" id="navbarNav">
-                <ul class="navbar-nav ms-auto">
-                    <li class="nav-item">
-                        <a class="nav-link" href="index.html">Dashboard</a>
+                <form class="d-flex ms-auto me-3">
+                    <div class="input-group">
+                        <input class="form-control" type="search" placeholder="Search" aria-label="Search">
+                        <button class="btn btn-outline-light" type="submit"><i class="bi bi-search"></i></button>
+                    </div>
+                </form>
+                
+                <ul class="navbar-nav">
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" id="notificationsDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                            <i class="bi bi-bell"></i>
+                            <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
+                                3
+                            </span>
+                        </a>
+                        <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="notificationsDropdown">
+                            <li><h6 class="dropdown-header">Notifications</h6></li>
+                            <li><a class="dropdown-item" href="#">Low stock alert: 5 products</a></li>
+                            <li><a class="dropdown-item" href="#">New order received: INV-1001</a></li>
+                            <li><a class="dropdown-item" href="#">Payment received: ₹15,000</a></li>
+                            <li><hr class="dropdown-divider"></li>
+                            <li><a class="dropdown-item text-primary" href="#">View all notifications</a></li>
+                        </ul>
                     </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="#">Inventory</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="#">Invoices</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="#">Expenses</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link active" href="reports.html">Reports</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="#">Settings</a>
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle d-flex align-items-center" href="#" id="userDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                            <div class="avatar me-2" id="userAvatar">JS</div>
+                            <span id="userName">User</span>
+                        </a>
+                        <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="userDropdown">
+                            <li><a class="dropdown-item" href="profile.html"><i class="bi bi-person me-2"></i>Profile</a></li>
+                            <li><a class="dropdown-item" href="#"><i class="bi bi-gear me-2"></i>Settings</a></li>
+                            <li><hr class="dropdown-divider"></li>
+                            <li><a class="dropdown-item" href="#" id="logoutButton"><i class="bi bi-box-arrow-right me-2"></i>Logout</a></li>
+                        </ul>
                     </li>
                 </ul>
             </div>
         </div>
     </nav>
 
-    <div class="container mt-5">
-        <div class="row">
-            <div class="col-md-12">
-                <h1 class="mb-4">Business Reports</h1>
-                <p class="lead">Generate detailed reports to track your business performance and make informed decisions.</p>
-            </div>
-        </div>
+    <!-- Sidebar -->
+    <div class="sidebar">
+        <ul class="nav flex-column mt-4">
+            <li class="nav-item">
+                <a class="nav-link" href="dashboard.html">
+                    <i class="bi bi-speedometer2"></i> Dashboard
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="inventory.html">
+                    <i class="bi bi-box-seam"></i> Inventory
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="invoice.html">
+                    <i class="bi bi-receipt"></i> Invoices
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="expenses.html">
+                    <i class="bi bi-currency-rupee"></i> Expenses
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="employees.html">
+                    <i class="bi bi-people"></i> Employees
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link active" href="reports.html">
+                    <i class="bi bi-bar-chart"></i> Reports
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="#">
+                    <i class="bi bi-gear"></i> Settings
+                </a>
+            </li>
+        </ul>
+    </div>
 
-        <!-- Date Filter Section -->
-        <div class="date-filter">
-            <div class="row">
-                <div class="col-md-4">
-                    <label for="reportType" class="form-label">Report Type</label>
-                    <select class="form-select" id="reportType">
-                        <option value="sales">Sales Report</option>
-                        <option value="expenses">Expense Report</option>
-                        <option value="profit-loss">Profit & Loss Report</option>
-                        <option value="inventory">Inventory Report</option>
-                    </select>
-                </div>
-                <div class="col-md-3">
-                    <label for="startDate" class="form-label">Start Date</label>
-                    <input type="date" class="form-control" id="startDate">
-                </div>
-                <div class="col-md-3">
-                    <label for="endDate" class="form-label">End Date</label>
-                    <input type="date" class="form-control" id="endDate">
-                </div>
-                <div class="col-md-2 d-flex align-items-end">
-                    <button id="generateReport" class="btn btn-primary w-100">Generate</button>
+    <!-- Main Content -->
+    <div class="main-content">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h2>Reports</h2>
+        </div>
+        
+        <!-- Report Types -->
+        <div class="row mb-4" id="reportSelectionRow">
+            <div class="col-md-3 mb-4">
+                <div class="card report-card h-100" data-report-type="sales">
+                    <div class="card-body text-center py-4">
+                        <i class="bi bi-graph-up-arrow report-icon"></i>
+                        <h5 class="card-title">Sales Report</h5>
+                        <p class="card-text text-muted">Analyze your sales performance over time</p>
+                    </div>
                 </div>
             </div>
-        </div>
-
-        <!-- Report Content Section -->
-        <div class="card report-card">
-            <div class="card-body">
-                <div id="reportContent">
-                    <div class="text-center">
-                        <p class="text-muted">Select a report type and date range above, then click Generate to view your report.</p>
+            <div class="col-md-3 mb-4">
+                <div class="card report-card h-100" data-report-type="profit-loss">
+                    <div class="card-body text-center py-4">
+                        <i class="bi bi-cash-stack report-icon"></i>
+                        <h5 class="card-title">Profit & Loss</h5>
+                        <p class="card-text text-muted">Track your business's financial health</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3 mb-4">
+                <div class="card report-card h-100" data-report-type="inventory">
+                    <div class="card-body text-center py-4">
+                        <i class="bi bi-box-seam report-icon"></i>
+                        <h5 class="card-title">Inventory Report</h5>
+                        <p class="card-text text-muted">Monitor your stock levels and valuation</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3 mb-4">
+                <div class="card report-card h-100" data-report-type="expense">
+                    <div class="card-body text-center py-4">
+                        <i class="bi bi-currency-rupee report-icon"></i>
+                        <h5 class="card-title">Expense Report</h5>
+                        <p class="card-text text-muted">Analyze your spending patterns</p>
                     </div>
                 </div>
             </div>
         </div>
-
-        <!-- Download Options -->
-        <div class="row mt-4">
-            <div class="col-md-12 text-end">
-                <button id="downloadPdf" class="btn btn-outline-primary" disabled>
-                    <i class="bi bi-file-pdf"></i> Download PDF
-                </button>
+        
+        <!-- Sales Report Section -->
+        <div id="salesReportSection" class="report-section" style="display: none;">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h3>Sales Report</h3>
+                <div>
+                    <button class="btn btn-outline-secondary me-2" id="backToReports">
+                        <i class="bi bi-arrow-left"></i> Back
+                    </button>
+                    <div class="btn-group">
+                        <button class="btn btn-outline-primary" id="exportSalesPdf">
+                            <i class="bi bi-file-pdf"></i> PDF
+                        </button>
+                        <button class="btn btn-outline-primary" id="exportSalesExcel">
+                            <i class="bi bi-file-excel"></i> Excel
+                        </button>
+                        <button class="btn btn-outline-primary" id="printSalesReport">
+                            <i class="bi bi-printer"></i> Print
+                        </button>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="filter-section">
+                <div class="row">
+                    <div class="col-md-3 mb-3">
+                        <label for="salesDateRange" class="form-label">Date Range</label>
+                        <select class="form-select" id="salesDateRange">
+                            <option value="today">Today</option>
+                            <option value="yesterday">Yesterday</option>
+                            <option value="this-week">This Week</option>
+                            <option value="last-week">Last Week</option>
+                            <option value="this-month" selected>This Month</option>
+                            <option value="last-month">Last Month</option>
+                            <option value="this-year">This Year</option>
+                            <option value="custom">Custom Range</option>
+                        </select>
+                    </div>
+                    <div class="col-md-3 mb-3" id="salesCustomRangeStart" style="display: none;">
+                        <label for="salesStartDate" class="form-label">Start Date</label>
+                        <input type="date" class="form-control" id="salesStartDate">
+                    </div>
+                    <div class="col-md-3 mb-3" id="salesCustomRangeEnd" style="display: none;">
+                        <label for="salesEndDate" class="form-label">End Date</label>
+                        <input type="date" class="form-control" id="salesEndDate">
+                    </div>
+                    <div class="col-md-3 mb-3">
+                        <label for="salesGroupBy" class="form-label">Group By</label>
+                        <select class="form-select" id="salesGroupBy">
+                            <option value="day">Day</option>
+                            <option value="week">Week</option>
+                            <option value="month">Month</option>
+                        </select>
+                    </div>
+                    <div class="col-md-3 mb-3 d-flex align-items-end">
+                        <button class="btn btn-primary w-100" id="generateSalesReport">
+                            <i class="bi bi-arrow-clockwise"></i> Generate Report
+                        </button>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="row mb-4">
+                <div class="col-md-3 mb-3">
+                    <div class="summary-card bg-sales">
+                        <div class="summary-title">Total Sales</div>
+                        <div class="summary-value">₹75,250</div>
+                        <div class="summary-subtitle">+12% from previous period</div>
+                    </div>
+                </div>
+                <div class="col-md-3 mb-3">
+                    <div class="summary-card bg-profit">
+                        <div class="summary-title">Total Invoices</div>
+                        <div class="summary-value">53</div>
+                        <div class="summary-subtitle">+8% from previous period</div>
+                    </div>
+                </div>
+                <div class="col-md-3 mb-3">
+                    <div class="summary-card bg-inventory">
+                        <div class="summary-title">Average Sale</div>
+                        <div class="summary-value">₹1,419</div>
+                        <div class="summary-subtitle">+3% from previous period</div>
+                    </div>
+                </div>
+                <div class="col-md-3 mb-3">
+                    <div class="summary-card bg-expenses">
+                        <div class="summary-title">Top Product</div>
+                        <div class="summary-value">Headphones</div>
+                        <div class="summary-subtitle">15 units sold</div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="date-range text-center mb-4">
+                <span class="date-nav me-3"><i class="bi bi-chevron-left"></i></span>
+                <span>May 1, 2023 - May 31, 2023</span>
+                <span class="date-nav ms-3"><i class="bi bi-chevron-right"></i></span>
+            </div>
+            
+            <div class="card mb-4">
+                <div class="card-body">
+                    <h5 class="card-title">Sales Trend</h5>
+                    <div class="chart-container">
+                        <canvas id="salesChart"></canvas>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="row mb-4">
+                <div class="col-md-6">
+                    <div class="card h-100">
+                        <div class="card-body">
+                            <h5 class="card-title">Top Selling Products</h5>
+                            <div class="chart-container">
+                                <canvas id="productChart"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="card h-100">
+                        <div class="card-body">
+                            <h5 class="card-title">Sales by Time of Day</h5>
+                            <div class="chart-container">
+                                <canvas id="timeChart"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title">Recent Sales</h5>
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead>
+                                <tr>
+                                    <th>Invoice #</th>
+                                    <th>Date</th>
+                                    <th>Customer</th>
+                                    <th>Amount</th>
+                                    <th>Status</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>INV-1001</td>
+                                    <td>May 30, 2023</td>
+                                    <td>Rajesh Kumar</td>
+                                    <td>₹2,500</td>
+                                    <td><span class="badge bg-success">Paid</span></td>
+                                </tr>
+                                <tr>
+                                    <td>INV-1002</td>
+                                    <td>May 28, 2023</td>
+                                    <td>Priya Sharma</td>
+                                    <td>₹1,800</td>
+                                    <td><span class="badge bg-success">Paid</span></td>
+                                </tr>
+                                <tr>
+                                    <td>INV-1003</td>
+                                    <td>May 27, 2023</td>
+                                    <td>Amit Singh</td>
+                                    <td>₹3,200</td>
+                                    <td><span class="badge bg-warning text-dark">Partial</span></td>
+                                </tr>
+                                <tr>
+                                    <td>INV-1004</td>
+                                    <td>May 25, 2023</td>
+                                    <td>Neha Patel</td>
+                                    <td>₹4,500</td>
+                                    <td><span class="badge bg-success">Paid</span></td>
+                                </tr>
+                                <tr>
+                                    <td>INV-1005</td>
+                                    <td>May 22, 2023</td>
+                                    <td>Vikram Desai</td>
+                                    <td>₹1,950</td>
+                                    <td><span class="badge bg-danger">Unpaid</span></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Profit & Loss Report Section -->
+        <div id="profitLossReportSection" class="report-section" style="display: none;">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h3>Profit & Loss Report</h3>
+                <div>
+                    <button class="btn btn-outline-secondary me-2" id="backToPLReports">
+                        <i class="bi bi-arrow-left"></i> Back
+                    </button>
+                    <div class="btn-group">
+                        <button class="btn btn-outline-primary" id="exportPLPdf">
+                            <i class="bi bi-file-pdf"></i> PDF
+                        </button>
+                        <button class="btn btn-outline-primary" id="exportPLExcel">
+                            <i class="bi bi-file-excel"></i> Excel
+                        </button>
+                        <button class="btn btn-outline-primary" id="printPLReport">
+                            <i class="bi bi-printer"></i> Print
+                        </button>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="filter-section">
+                <div class="row">
+                    <div class="col-md-3 mb-3">
+                        <label for="plDateRange" class="form-label">Date Range</label>
+                        <select class="form-select" id="plDateRange">
+                            <option value="this-month" selected>This Month</option>
+                            <option value="last-month">Last Month</option>
+                            <option value="last-3-months">Last 3 Months</option>
+                            <option value="last-6-months">Last 6 Months</option>
+                            <option value="this-year">This Year</option>
+                            <option value="last-year">Last Year</option>
+                            <option value="custom">Custom Range</option>
+                        </select>
+                    </div>
+                    <div class="col-md-3 mb-3" id="plCustomRangeStart" style="display: none;">
+                        <label for="plStartDate" class="form-label">Start Date</label>
+                        <input type="date" class="form-control" id="plStartDate">
+                    </div>
+                    <div class="col-md-3 mb-3" id="plCustomRangeEnd" style="display: none;">
+                        <label for="plEndDate" class="form-label">End Date</label>
+                        <input type="date" class="form-control" id="plEndDate">
+                    </div>
+                    <div class="col-md-3 mb-3 d-flex align-items-end">
+                        <button class="btn btn-primary w-100" id="generatePLReport">
+                            <i class="bi bi-arrow-clockwise"></i> Generate Report
+                        </button>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="row mb-4">
+                <div class="col-md-3 mb-3">
+                    <div class="summary-card bg-sales">
+                        <div class="summary-title">Total Revenue</div>
+                        <div class="summary-value">₹2,85,750</div>
+                        <div class="summary-subtitle">+8% from previous period</div>
+                    </div>
+                </div>
+                <div class="col-md-3 mb-3">
+                    <div class="summary-card bg-expenses">
+                        <div class="summary-title">Total Expenses</div>
+                        <div class="summary-value">₹1,42,300</div>
+                        <div class="summary-subtitle">+5% from previous period</div>
+                    </div>
+                </div>
+                <div class="col-md-3 mb-3">
+                    <div class="summary-card bg-profit">
+                        <div class="summary-title">Net Profit</div>
+                        <div class="summary-value">₹1,43,450</div>
+                        <div class="summary-subtitle">+11% from previous period</div>
+                    </div>
+                </div>
+                <div class="col-md-3 mb-3">
+                    <div class="summary-card bg-inventory">
+                        <div class="summary-title">Profit Margin</div>
+                        <div class="summary-value">50.2%</div>
+                        <div class="summary-subtitle">+3% from previous period</div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="date-range text-center mb-4">
+                <span class="date-nav me-3"><i class="bi bi-chevron-left"></i></span>
+                <span>May 1, 2023 - May 31, 2023</span>
+                <span class="date-nav ms-3"><i class="bi bi-chevron-right"></i></span>
+            </div>
+            
+            <div class="card mb-4">
+                <div class="card-body">
+                    <h5 class="card-title">Profit & Loss Overview</h5>
+                    <div class="chart-container">
+                        <canvas id="profitLossChart"></canvas>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="row mb-4">
+                <div class="col-md-6">
+                    <div class="card h-100">
+                        <div class="card-body">
+                            <h5 class="card-title">Revenue Breakdown</h5>
+                            <div class="chart-container">
+                                <canvas id="revenueChart"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="card h-100">
+                        <div class="card-body">
+                            <h5 class="card-title">Expense Breakdown</h5>
+                            <div class="chart-container">
+                                <canvas id="expenseChart"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title">Profit & Loss Statement</h5>
+                    <div class="table-responsive">
+                        <table class="table">
+                            <thead>
+                                <tr>
+                                    <th>Category</th>
+                                    <th class="text-end">Amount (₹)</th>
+                                    <th class="text-end">% of Total</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr class="table-light">
+                                    <th colspan="3">Revenue</th>
+                                </tr>
+                                <tr>
+                                    <td>Product Sales</td>
+                                    <td class="text-end">2,65,500</td>
+                                    <td class="text-end">92.9%</td>
+                                </tr>
+                                <tr>
+                                    <td>Service Revenue</td>
+                                    <td class="text-end">18,250</td>
+                                    <td class="text-end">6.4%</td>
+                                </tr>
+                                <tr>
+                                    <td>Other Revenue</td>
+                                    <td class="text-end">2,000</td>
+                                    <td class="text-end">0.7%</td>
+                                </tr>
+                                <tr class="fw-bold">
+                                    <td>Total Revenue</td>
+                                    <td class="text-end">2,85,750</td>
+                                    <td class="text-end">100%</td>
+                                </tr>
+                                <tr class="table-light">
+                                    <th colspan="3">Expenses</th>
+                                </tr>
+                                <tr>
+                                    <td>Cost of Goods Sold</td>
+                                    <td class="text-end">1,05,800</td>
+                                    <td class="text-end">74.3%</td>
+                                </tr>
+                                <tr>
+                                    <td>Rent</td>
+                                    <td class="text-end">12,000</td>
+                                    <td class="text-end">8.4%</td>
+                                </tr>
+                                <tr>
+                                    <td>Utilities</td>
+                                    <td class="text-end">4,500</td>
+                                    <td class="text-end">3.2%</td>
+                                </tr>
+                                <tr>
+                                    <td>Salaries</td>
+                                    <td class="text-end">15,000</td>
+                                    <td class="text-end">10.5%</td>
+                                </tr>
+                                <tr>
+                                    <td>Marketing</td>
+                                    <td class="text-end">3,000</td>
+                                    <td class="text-end">2.1%</td>
+                                </tr>
+                                <tr>
+                                    <td>Other Expenses</td>
+                                    <td class="text-end">2,000</td>
+                                    <td class="text-end">1.4%</td>
+                                </tr>
+                                <tr class="fw-bold">
+                                    <td>Total Expenses</td>
+                                    <td class="text-end">1,42,300</td>
+                                    <td class="text-end">100%</td>
+                                </tr>
+                                <tr class="table-light">
+                                    <th colspan="3">Summary</th>
+                                </tr>
+                                <tr class="fw-bold">
+                                    <td>Net Profit</td>
+                                    <td class="text-end">1,43,450</td>
+                                    <td class="text-end">50.2%</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Inventory Report Section -->
+        <div id="inventoryReportSection" class="report-section" style="display: none;">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h3>Inventory Report</h3>
+                <div>
+                    <button class="btn btn-outline-secondary me-2" id="backToInventoryReports">
+                        <i class="bi bi-arrow-left"></i> Back
+                    </button>
+                    <div class="btn-group">
+                        <button class="btn btn-outline-primary" id="exportInventoryPdf">
+                            <i class="bi bi-file-pdf"></i> PDF
+                        </button>
+                        <button class="btn btn-outline-primary" id="exportInventoryExcel">
+                            <i class="bi bi-file-excel"></i> Excel
+                        </button>
+                        <button class="btn btn-outline-primary" id="printInventoryReport">
+                            <i class="bi bi-printer"></i> Print
+                        </button>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="filter-section">
+                <div class="row">
+                    <div class="col-md-3 mb-3">
+                        <label for="inventoryCategory" class="form-label">Category</label>
+                        <select class="form-select" id="inventoryCategory">
+                            <option value="">All Categories</option>
+                            <option value="Electronics">Electronics</option>
+                            <option value="Clothing">Clothing</option>
+                            <option value="Home & Kitchen">Home & Kitchen</option>
+                            <option value="Beauty">Beauty</option>
+                            <option value="Sports">Sports</option>
+                        </select>
+                    </div>
+                    <div class="col-md-3 mb-3">
+                        <label for="inventoryStatus" class="form-label">Stock Status</label>
+                        <select class="form-select" id="inventoryStatus">
+                            <option value="">All Status</option>
+                            <option value="in-stock">In Stock</option>
+                            <option value="low-stock">Low Stock</option>
+                            <option value="out-of-stock">Out of Stock</option>
+                        </select>
+                    </div>
+                    <div class="col-md-3 mb-3">
+                        <label for="inventoryValueRange" class="form-label">Value Range</label>
+                        <select class="form-select" id="inventoryValueRange">
+                            <option value="">All Values</option>
+                            <option value="high">High Value (>₹5000)</option>
+                            <option value="medium">Medium Value (₹1000-₹5000)</option>
+                            <option value="low">Low Value (<₹1000)</option>
+                        </select>
+                    </div>
+                    <div class="col-md-3 mb-3 d-flex align-items-end">
+                        <button class="btn btn-primary w-100" id="generateInventoryReport">
+                            <i class="bi bi-arrow-clockwise"></i> Generate Report
+                        </button>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="row mb-4">
+                <div class="col-md-3 mb-3">
+                    <div class="summary-card bg-inventory">
+                        <div class="summary-title">Total Products</div>
+                        <div class="summary-value">157</div>
+                        <div class="summary-subtitle">in 5 categories</div>
+                    </div>
+                </div>
+                <div class="col-md-3 mb-3">
+                    <div class="summary-card bg-sales">
+                        <div class="summary-title">Total Inventory Value</div>
+                        <div class="summary-value">₹8,52,500</div>
+                        <div class="summary-subtitle">at selling price</div>
+                    </div>
+                </div>
+                <div class="col-md-3 mb-3">
+                    <div class="summary-card bg-expenses">
+                        <div class="summary-title">Low Stock Items</div>
+                        <div class="summary-value">12</div>
+                        <div class="summary-subtitle">need reordering</div>
+                    </div>
+                </div>
+                <div class="col-md-3 mb-3">
+                    <div class="summary-card bg-profit">
+                        <div class="summary-title">Average Product Value</div>
+                        <div class="summary-value">₹5,430</div>
+                        <div class="summary-subtitle">per unit</div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="row mb-4">
+                <div class="col-md-6">
+                    <div class="card h-100">
+                        <div class="card-body">
+                            <h5 class="card-title">Inventory by Category</h5>
+                            <div class="chart-container">
+                                <canvas id="categoryInventoryChart"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="card h-100">
+                        <div class="card-body">
+                            <h5 class="card-title">Inventory Value Distribution</h5>
+                            <div class="chart-container">
+                                <canvas id="valueDistributionChart"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title">Inventory Items</h5>
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead>
+                                <tr>
+                                    <th>Product</th>
+                                    <th>SKU</th>
+                                    <th>Category</th>
+                                    <th>Price</th>
+                                    <th>Quantity</th>
+                                    <th>Value</th>
+                                    <th>Status</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>Bluetooth Headphones</td>
+                                    <td>BH-001</td>
+                                    <td>Electronics</td>
+                                    <td>₹1,200</td>
+                                    <td>15</td>
+                                    <td>₹18,000</td>
+                                    <td><span class="inventory-badge badge-in-stock">In Stock</span></td>
+                                </tr>
+                                <tr>
+                                    <td>Smartphone X Pro</td>
+                                    <td>SP-101</td>
+                                    <td>Electronics</td>
+                                    <td>₹15,000</td>
+                                    <td>3</td>
+                                    <td>₹45,000</td>
+                                    <td><span class="inventory-badge badge-low-stock">Low Stock</span></td>
+                                </tr>
+                                <tr>
+                                    <td>Cotton T-Shirt</td>
+                                    <td>CT-010</td>
+                                    <td>Clothing</td>
+                                    <td>₹450</td>
+                                    <td>25</td>
+                                    <td>₹11,250</td>
+                                    <td><span class="inventory-badge badge-in-stock">In Stock</span></td>
+                                </tr>
+                                <tr>
+                                    <td>Smart Watch</td>
+                                    <td>SW-022</td>
+                                    <td>Electronics</td>
+                                    <td>₹3,500</td>
+                                    <td>0</td>
+                                    <td>₹0</td>
+                                    <td><span class="inventory-badge badge-out-of-stock">Out of Stock</span></td>
+                                </tr>
+                                <tr>
+                                    <td>Wireless Earbuds</td>
+                                    <td>WE-023</td>
+                                    <td>Electronics</td>
+                                    <td>₹1,800</td>
+                                    <td>8</td>
+                                    <td>₹14,400</td>
+                                    <td><span class="inventory-badge badge-in-stock">In Stock</span></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Expense Report Section -->
+        <div id="expenseReportSection" class="report-section" style="display: none;">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h3>Expense Report</h3>
+                <div>
+                    <button class="btn btn-outline-secondary me-2" id="backToExpenseReports">
+                        <i class="bi bi-arrow-left"></i> Back
+                    </button>
+                    <div class="btn-group">
+                        <button class="btn btn-outline-primary" id="exportExpensePdf">
+                            <i class="bi bi-file-pdf"></i> PDF
+                        </button>
+                        <button class="btn btn-outline-primary" id="exportExpenseExcel">
+                            <i class="bi bi-file-excel"></i> Excel
+                        </button>
+                        <button class="btn btn-outline-primary" id="printExpenseReport">
+                            <i class="bi bi-printer"></i> Print
+                        </button>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="filter-section">
+                <div class="row">
+                    <div class="col-md-3 mb-3">
+                        <label for="expenseDateRange" class="form-label">Date Range</label>
+                        <select class="form-select" id="expenseDateRange">
+                            <option value="this-month" selected>This Month</option>
+                            <option value="last-month">Last Month</option>
+                            <option value="last-3-months">Last 3 Months</option>
+                            <option value="last-6-months">Last 6 Months</option>
+                            <option value="this-year">This Year</option>
+                            <option value="last-year">Last Year</option>
+                            <option value="custom">Custom Range</option>
+                        </select>
+                    </div>
+                    <div class="col-md-3 mb-3" id="expenseCustomRangeStart" style="display: none;">
+                        <label for="expenseStartDate" class="form-label">Start Date</label>
+                        <input type="date" class="form-control" id="expenseStartDate">
+                    </div>
+                    <div class="col-md-3 mb-3" id="expenseCustomRangeEnd" style="display: none;">
+                        <label for="expenseEndDate" class="form-label">End Date</label>
+                        <input type="date" class="form-control" id="expenseEndDate">
+                    </div>
+                    <div class="col-md-3 mb-3">
+                        <label for="expenseCategory" class="form-label">Category</label>
+                        <select class="form-select" id="expenseCategory">
+                            <option value="">All Categories</option>
+                            <option value="Utilities">Utilities</option>
+                            <option value="Rent">Rent</option>
+                            <option value="Salary">Salary</option>
+                            <option value="Marketing">Marketing</option>
+                            <option value="Supplies">Supplies</option>
+                            <option value="Travel">Travel</option>
+                        </select>
+                    </div>
+                    <div class="col-md-3 mb-3 d-flex align-items-end">
+                        <button class="btn btn-primary w-100" id="generateExpenseReport">
+                            <i class="bi bi-arrow-clockwise"></i> Generate Report
+                        </button>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="row mb-4">
+                <div class="col-md-3 mb-3">
+                    <div class="summary-card bg-expenses">
+                        <div class="summary-title">Total Expenses</div>
+                        <div class="summary-value">₹42,500</div>
+                        <div class="summary-subtitle">+5% from previous period</div>
+                    </div>
+                </div>
+                <div class="col-md-3 mb-3">
+                    <div class="summary-card bg-sales">
+                        <div class="summary-title">Highest Category</div>
+                        <div class="summary-value">Rent</div>
+                        <div class="summary-subtitle">₹12,000 (28.2%)</div>
+                    </div>
+                </div>
+                <div class="col-md-3 mb-3">
+                    <div class="summary-card bg-inventory">
+                        <div class="summary-title">Total Transactions</div>
+                        <div class="summary-value">23</div>
+                        <div class="summary-subtitle">this period</div>
+                    </div>
+                </div>
+                <div class="col-md-3 mb-3">
+                    <div class="summary-card bg-profit">
+                        <div class="summary-title">Daily Average</div>
+                        <div class="summary-value">₹1,416</div>
+                        <div class="summary-subtitle">for 30 days</div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="date-range text-center mb-4">
+                <span class="date-nav me-3"><i class="bi bi-chevron-left"></i></span>
+                <span>May 1, 2023 - May 31, 2023</span>
+                <span class="date-nav ms-3"><i class="bi bi-chevron-right"></i></span>
+            </div>
+            
+            <div class="card mb-4">
+                <div class="card-body">
+                    <h5 class="card-title">Expense Trend</h5>
+                    <div class="chart-container">
+                        <canvas id="expenseTrendChart"></canvas>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="row mb-4">
+                <div class="col-md-6">
+                    <div class="card h-100">
+                        <div class="card-body">
+                            <h5 class="card-title">Expenses by Category</h5>
+                            <div class="chart-container">
+                                <canvas id="expenseCategoryChart"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="card h-100">
+                        <div class="card-body">
+                            <h5 class="card-title">Recurring vs One-time Expenses</h5>
+                            <div class="chart-container">
+                                <canvas id="expenseTypeChart"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title">Recent Expenses</h5>
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead>
+                                <tr>
+                                    <th>Date</th>
+                                    <th>Title</th>
+                                    <th>Category</th>
+                                    <th>Amount</th>
+                                    <th>Recurring</th>
+                                    <th>Receipt</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>May 30, 2023</td>
+                                    <td>Office Supplies</td>
+                                    <td>Supplies</td>
+                                    <td>₹1,500</td>
+                                    <td>No</td>
+                                    <td><i class="bi bi-file-earmark-image text-primary"></i></td>
+                                </tr>
+                                <tr>
+                                    <td>May 28, 2023</td>
+                                    <td>Electricity Bill</td>
+                                    <td>Utilities</td>
+                                    <td>₹2,800</td>
+                                    <td>Yes (Monthly)</td>
+                                    <td><i class="bi bi-file-earmark-image text-primary"></i></td>
+                                </tr>
+                                <tr>
+                                    <td>May 25, 2023</td>
+                                    <td>Office Rent</td>
+                                    <td>Rent</td>
+                                    <td>₹12,000</td>
+                                    <td>Yes (Monthly)</td>
+                                    <td><i class="bi bi-file-earmark-image text-primary"></i></td>
+                                </tr>
+                                <tr>
+                                    <td>May 20, 2023</td>
+                                    <td>Facebook Ads</td>
+                                    <td>Marketing</td>
+                                    <td>₹3,000</td>
+                                    <td>No</td>
+                                    <td>-</td>
+                                </tr>
+                                <tr>
+                                    <td>May 15, 2023</td>
+                                    <td>Staff Salaries</td>
+                                    <td>Salary</td>
+                                    <td>₹15,000</td>
+                                    <td>Yes (Monthly)</td>
+                                    <td>-</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
 
-    <footer class="mt-5">
-        <div class="container">
-            <div class="row">
-                <div class="col-lg-4">
-                    <h5>ReSellPro</h5>
-                    <p>Smart Business Hub for Resellers</p>
-                </div>
-                <div class="col-lg-4">
-                    <h5>Contact</h5>
-                    <p>Email: info@resellpro.com<br>
-                    Phone: +1 (555) 123-4567</p>
-                </div>
-                <div class="col-lg-4">
-                    <h5>Quick Links</h5>
-                    <ul class="list-unstyled">
-                        <li><a href="#" class="text-white">Dashboard</a></li>
-                        <li><a href="#" class="text-white">Reports</a></li>
-                        <li><a href="#" class="text-white">Help</a></li>
-                    </ul>
-                </div>
-            </div>
-            <hr class="my-4 bg-light">
-            <div class="text-center">
-                <p>© 2025 ReSellPro. All rights reserved.</p>
-            </div>
-        </div>
-    </footer>
-
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script>
         document.addEventListener('DOMContentLoaded', function() {
-            const apiUrl = 'http://localhost:3000/api';
-            const reportContent = document.getElementById('reportContent');
-            const generateBtn = document.getElementById('generateReport');
-            const downloadPdfBtn = document.getElementById('downloadPdf');
+            // Check if user is logged in
+            const token = localStorage.getItem('token');
+            const user = JSON.parse(localStorage.getItem('user') || '{}');
             
-            // Mock authentication token (in a real app, this would come from login)
-            const mockToken = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MSwiaWF0IjoxNjE2NjkwNzAyLCJleHAiOjE2MTY3NzcxMDJ9.example-token';
+            if (!token) {
+                // Redirect to login if not logged in
+                window.location.href = 'login.html';
+                return;
+            }
             
-            generateBtn.addEventListener('click', function() {
-                const reportType = document.getElementById('reportType').value;
-                const startDate = document.getElementById('startDate').value;
-                const endDate = document.getElementById('endDate').value;
+            // Set user display name and avatar
+            const userNameElement = document.getElementById('userName');
+            const userAvatarElement = document.getElementById('userAvatar');
+            
+            if (user.firstName && user.lastName) {
+                userNameElement.textContent = `${user.firstName} ${user.lastName}`;
+                userAvatarElement.textContent = `${user.firstName.charAt(0)}${user.lastName.charAt(0)}`;
+            } else if (user.username) {
+                userNameElement.textContent = user.username;
+                userAvatarElement.textContent = user.username.substring(0, 2).toUpperCase();
+            }
+            
+            // Toggle sidebar on mobile
+            document.getElementById('sidebarToggle').addEventListener('click', function() {
+                document.querySelector('.sidebar').classList.toggle('active');
+                document.querySelector('.main-content').classList.toggle('active');
+            });
+            
+            // Logout functionality
+            document.getElementById('logoutButton').addEventListener('click', function(e) {
+                e.preventDefault();
+                localStorage.removeItem('token');
+                localStorage.removeItem('user');
+                window.location.href = 'login.html';
+            });
+            
+            // Report Selection
+            const reportCards = document.querySelectorAll('.report-card');
+            const reportSections = document.querySelectorAll('.report-section');
+            const reportSelectionRow = document.getElementById('reportSelectionRow');
+            
+            // Show selected report section
+            function showReportSection(type) {
+                reportSelectionRow.style.display = 'none';
                 
-                // Validate dates if both are provided
-                if ((startDate && !endDate) || (!startDate && endDate)) {
-                    alert('Please provide both start and end dates, or leave both empty for all-time data.');
-                    return;
-                }
+                reportSections.forEach(section => {
+                    section.style.display = 'none';
+                });
                 
-                if (startDate && endDate && new Date(startDate) > new Date(endDate)) {
-                    alert('Start date cannot be after end date.');
-                    return;
-                }
-                
-                // Show loading indicator
-                reportContent.innerHTML = `
-                    <div class="loading">
-                        <div class="spinner-border text-primary" role="status">
-                            <span class="visually-hidden">Loading...</span>
-                        </div>
-                    </div>
-                `;
-                
-                // Build query string
-                let queryParams = `?reportType=${reportType}`;
-                if (startDate) queryParams += `&startDate=${startDate}`;
-                if (endDate) queryParams += `&endDate=${endDate}`;
-                
-                // Fetch report data
-                fetch(`${apiUrl}/reports/${reportType}${startDate ? `?startDate=${startDate}&endDate=${endDate}` : ''}`, {
-                    method: 'GET',
-                    headers: {
-                        'x-access-token': mockToken,
-                        'Content-Type': 'application/json'
-                    }
-                })
-                .then(response => {
-                    if (!response.ok) {
-                        throw new Error('Network response was not ok');
-                    }
-                    return response.json();
-                })
-                .then(data => {
-                    // Enable download button
-                    downloadPdfBtn.disabled = false;
+                const selectedSection = document.getElementById(`${type}ReportSection`);
+                if (selectedSection) {
+                    selectedSection.style.display = 'block';
                     
-                    // Render report based on type
-                    switch(reportType) {
+                    // Initialize charts for the selected section
+                    switch(type) {
                         case 'sales':
-                            renderSalesReport(data);
-                            break;
-                        case 'expenses':
-                            renderExpenseReport(data);
+                            initializeSalesCharts();
                             break;
                         case 'profit-loss':
-                            renderProfitLossReport(data);
+                            initializeProfitLossCharts();
                             break;
                         case 'inventory':
-                            renderInventoryReport(data);
+                            initializeInventoryCharts();
                             break;
-                        default:
-                            reportContent.innerHTML = '<p class="text-danger">Unknown report type</p>';
+                        case 'expense':
+                            initializeExpenseCharts();
+                            break;
                     }
-                })
-                .catch(error => {
-                    console.error('Error fetching report:', error);
-                    reportContent.innerHTML = `
-                        <div class="alert alert-danger" role="alert">
-                            Failed to generate report. Please try again later.
-                            <br>
-                            <small>${error.message}</small>
-                        </div>
-                    `;
-                    
-                    // Disable download button
-                    downloadPdfBtn.disabled = true;
+                }
+            }
+            
+            // Report Card Click Handlers
+            reportCards.forEach(card => {
+                card.addEventListener('click', function() {
+                    const reportType = this.getAttribute('data-report-type');
+                    if (reportType) {
+                        showReportSection(reportType);
+                    }
                 });
             });
             
-            // PDF Download
-            downloadPdfBtn.addEventListener('click', function() {
-                const reportType = document.getElementById('reportType').value;
-                const startDate = document.getElementById('startDate').value;
-                const endDate = document.getElementById('endDate').value;
-                
-                let queryParams = `?reportType=${reportType}`;
-                if (startDate) queryParams += `&startDate=${startDate}`;
-                if (endDate) queryParams += `&endDate=${endDate}`;
-                
-                // Open PDF in new tab (browser will download it)
-                window.open(`${apiUrl}/reports/pdf${queryParams}`, '_blank');
+            // Back buttons
+            document.getElementById('backToReports').addEventListener('click', function() {
+                reportSections.forEach(section => {
+                    section.style.display = 'none';
+                });
+                reportSelectionRow.style.display = 'flex';
             });
             
-            // Render functions
-            function renderSalesReport(data) {
-                const { summary, productSales, invoices } = data;
+            document.getElementById('backToPLReports').addEventListener('click', function() {
+                reportSections.forEach(section => {
+                    section.style.display = 'none';
+                });
+                reportSelectionRow.style.display = 'flex';
+            });
+            
+            document.getElementById('backToInventoryReports').addEventListener('click', function() {
+                reportSections.forEach(section => {
+                    section.style.display = 'none';
+                });
+                reportSelectionRow.style.display = 'flex';
+            });
+            
+            document.getElementById('backToExpenseReports').addEventListener('click', function() {
+                reportSections.forEach(section => {
+                    section.style.display = 'none';
+                });
+                reportSelectionRow.style.display = 'flex';
+            });
+            
+            // Custom date range toggle handlers
+            document.getElementById('salesDateRange').addEventListener('change', function() {
+                const customRangeStart = document.getElementById('salesCustomRangeStart');
+                const customRangeEnd = document.getElementById('salesCustomRangeEnd');
                 
-                let html = `
-                    <h3>Sales Report</h3>
-                    <div class="card mb-4">
-                        <div class="card-body">
-                            <h5 class="card-title">Summary</h5>
-                            <div class="row">
-                                <div class="col-md-4">
-                                    <div class="mb-3">
-                                        <h6 class="text-muted">Total Sales</h6>
-                                        <h3>₹${summary.totalSales.toFixed(2)}</h3>
-                                    </div>
-                                </div>
-                                <div class="col-md-4">
-                                    <div class="mb-3">
-                                        <h6 class="text-muted">Total Invoices</h6>
-                                        <h3>${summary.totalInvoices}</h3>
-                                    </div>
-                                </div>
-                                <div class="col-md-4">
-                                    <div class="mb-3">
-                                        <h6 class="text-muted">Average Sale</h6>
-                                        <h3>₹${summary.averageSale.toFixed(2)}</h3>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                `;
-                
-                // Top selling products
-                if (productSales && productSales.length > 0) {
-                    html += `
-                        <h5 class="mt-4">Top Selling Products</h5>
-                        <div class="table-responsive">
-                            <table class="table table-striped">
-                                <thead>
-                                    <tr>
-                                        <th>Product</th>
-                                        <th>Quantity Sold</th>
-                                        <th>Revenue</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                    `;
-                    
-                    productSales.slice(0, 10).forEach(product => {
-                        html += `
-                            <tr>
-                                <td>${product.productName}</td>
-                                <td>${product.quantity}</td>
-                                <td>₹${product.revenue.toFixed(2)}</td>
-                            </tr>
-                        `;
-                    });
-                    
-                    html += `
-                                </tbody>
-                            </table>
-                        </div>
-                    `;
+                if (this.value === 'custom') {
+                    customRangeStart.style.display = 'block';
+                    customRangeEnd.style.display = 'block';
+                } else {
+                    customRangeStart.style.display = 'none';
+                    customRangeEnd.style.display = 'none';
                 }
+            });
+            
+            document.getElementById('plDateRange').addEventListener('change', function() {
+                const customRangeStart = document.getElementById('plCustomRangeStart');
+                const customRangeEnd = document.getElementById('plCustomRangeEnd');
                 
-                // Recent invoices
-                if (invoices && invoices.length > 0) {
-                    html += `
-                        <h5 class="mt-4">Recent Invoices</h5>
-                        <div class="table-responsive">
-                            <table class="table table-striped">
-                                <thead>
-                                    <tr>
-                                        <th>Invoice #</th>
-                                        <th>Date</th>
-                                        <th>Customer</th>
-                                        <th>Status</th>
-                                        <th>Amount</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                    `;
-                    
-                    invoices.slice(0, 10).forEach(invoice => {
-                        const date = new Date(invoice.createdAt).toLocaleDateString();
-                        html += `
-                            <tr>
-                                <td>${invoice.invoiceNumber}</td>
-                                <td>${date}</td>
-                                <td>${invoice.customerName}</td>
-                                <td><span class="badge ${getStatusBadgeClass(invoice.paymentStatus)}">${invoice.paymentStatus || 'unpaid'}</span></td>
-                                <td>₹${invoice.total.toFixed(2)}</td>
-                            </tr>
-                        `;
-                    });
-                    
-                    html += `
-                                </tbody>
-                            </table>
-                        </div>
-                    `;
+                if (this.value === 'custom') {
+                    customRangeStart.style.display = 'block';
+                    customRangeEnd.style.display = 'block';
+                } else {
+                    customRangeStart.style.display = 'none';
+                    customRangeEnd.style.display = 'none';
                 }
+            });
+            
+            document.getElementById('expenseDateRange').addEventListener('change', function() {
+                const customRangeStart = document.getElementById('expenseCustomRangeStart');
+                const customRangeEnd = document.getElementById('expenseCustomRangeEnd');
                 
-                reportContent.innerHTML = html;
+                if (this.value === 'custom') {
+                    customRangeStart.style.display = 'block';
+                    customRangeEnd.style.display = 'block';
+                } else {
+                    customRangeStart.style.display = 'none';
+                    customRangeEnd.style.display = 'none';
+                }
+            });
+            
+            // Export button handlers
+            document.getElementById('exportSalesPdf').addEventListener('click', function() {
+                alert('PDF Export functionality will be implemented here.');
+            });
+            
+            document.getElementById('exportSalesExcel').addEventListener('click', function() {
+                alert('Excel Export functionality will be implemented here.');
+            });
+            
+            document.getElementById('printSalesReport').addEventListener('click', function() {
+                window.print();
+            });
+            
+            document.getElementById('exportPLPdf').addEventListener('click', function() {
+                alert('PDF Export functionality will be implemented here.');
+            });
+            
+            document.getElementById('exportPLExcel').addEventListener('click', function() {
+                alert('Excel Export functionality will be implemented here.');
+            });
+            
+            document.getElementById('printPLReport').addEventListener('click', function() {
+                window.print();
+            });
+            
+            document.getElementById('exportInventoryPdf').addEventListener('click', function() {
+                alert('PDF Export functionality will be implemented here.');
+            });
+            
+            document.getElementById('exportInventoryExcel').addEventListener('click', function() {
+                alert('Excel Export functionality will be implemented here.');
+            });
+            
+            document.getElementById('printInventoryReport').addEventListener('click', function() {
+                window.print();
+            });
+            
+            document.getElementById('exportExpensePdf').addEventListener('click', function() {
+                alert('PDF Export functionality will be implemented here.');
+            });
+            
+            document.getElementById('exportExpenseExcel').addEventListener('click', function() {
+                alert('Excel Export functionality will be implemented here.');
+            });
+            
+            document.getElementById('printExpenseReport').addEventListener('click', function() {
+                window.print();
+            });
+            
+            // Filter button handlers
+            document.getElementById('generateSalesReport').addEventListener('click', function() {
+                alert('Regenerating Sales Report with new filters...');
+                // Reinitialize charts with new data
+                initializeSalesCharts();
+            });
+            
+            document.getElementById('generatePLReport').addEventListener('click', function() {
+                alert('Regenerating Profit & Loss Report with new filters...');
+                // Reinitialize charts with new data
+                initializeProfitLossCharts();
+            });
+            
+            document.getElementById('generateInventoryReport').addEventListener('click', function() {
+                alert('Regenerating Inventory Report with new filters...');
+                // Reinitialize charts with new data
+                initializeInventoryCharts();
+            });
+            
+            document.getElementById('generateExpenseReport').addEventListener('click', function() {
+                alert('Regenerating Expense Report with new filters...');
+                // Reinitialize charts with new data
+                initializeExpenseCharts();
+            });
+            
+            // Initialize Charts
+            function initializeSalesCharts() {
+                // Sales Chart
+                const salesChartCtx = document.getElementById('salesChart').getContext('2d');
+                new Chart(salesChartCtx, {
+                    type: 'line',
+                    data: {
+                        labels: ['May 1', 'May 5', 'May 10', 'May 15', 'May 20', 'May 25', 'May 30'],
+                        datasets: [{
+                            label: 'Sales',
+                            data: [5200, 7500, 4800, 9200, 6800, 10500, 8000],
+                            backgroundColor: 'rgba(74, 107, 223, 0.2)',
+                            borderColor: '#4a6bdf',
+                            borderWidth: 2,
+                            tension: 0.3,
+                            fill: true
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        scales: {
+                            y: {
+                                beginAtZero: true,
+                                ticks: {
+                                    callback: function(value) {
+                                        return '₹' + value.toLocaleString();
+                                    }
+                                }
+                            }
+                        },
+                        plugins: {
+                            tooltip: {
+                                callbacks: {
+                                    label: function(context) {
+                                        return 'Sales: ₹' + context.raw.toLocaleString();
+                                    }
+                                }
+                            }
+                        }
+                    }
+                });
+                
+                // Product Chart
+                const productChartCtx = document.getElementById('productChart').getContext('2d');
+                new Chart(productChartCtx, {
+                    type: 'bar',
+                    data: {
+                        labels: ['Headphones', 'Smartphone', 'Smart Watch', 'T-Shirt', 'Bluetooth Speaker'],
+                        datasets: [{
+                            label: 'Units Sold',
+                            data: [15, 8, 10, 12, 7],
+                            backgroundColor: [
+                                '#4a6bdf',
+                                '#ff6b6b',
+                                '#20c997',
+                                '#ffd166',
+                                '#6f42c1'
+                            ],
+                            borderWidth: 0
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        scales: {
+                            y: {
+                                beginAtZero: true
+                            }
+                        },
+                        indexAxis: 'y'
+                    }
+                });
+                
+                // Time Chart
+                const timeChartCtx = document.getElementById('timeChart').getContext('2d');
+                new Chart(timeChartCtx, {
+                    type: 'bar',
+                    data: {
+                        labels: ['Morning', 'Afternoon', 'Evening', 'Night'],
+                        datasets: [{
+                            label: 'Sales',
+                            data: [18500, 22800, 27500, 6450],
+                            backgroundColor: [
+                                '#ffd166',
+                                '#4a6bdf',
+                                '#ff6b6b',
+                                '#20c997'
+                            ],
+                            borderWidth: 0
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        scales: {
+                            y: {
+                                beginAtZero: true,
+                                ticks: {
+                                    callback: function(value) {
+                                        return '₹' + value.toLocaleString();
+                                    }
+                                }
+                            }
+                        },
+                        plugins: {
+                            tooltip: {
+                                callbacks: {
+                                    label: function(context) {
+                                        return 'Sales: ₹' + context.raw.toLocaleString();
+                                    }
+                                }
+                            }
+                        }
+                    }
+                });
             }
             
-            function renderExpenseReport(data) {
-                const { summary, expensesByCategory, expenses } = data;
+            function initializeProfitLossCharts() {
+                // Profit & Loss Chart
+                const profitLossChartCtx = document.getElementById('profitLossChart').getContext('2d');
+                new Chart(profitLossChartCtx, {
+                    type: 'bar',
+                    data: {
+                        labels: ['Week 1', 'Week 2', 'Week 3', 'Week 4'],
+                        datasets: [
+                            {
+                                label: 'Revenue',
+                                data: [68000, 72500, 75250, 70000],
+                                backgroundColor: '#4a6bdf',
+                                borderWidth: 0
+                            },
+                            {
+                                label: 'Expenses',
+                                data: [35000, 38500, 32800, 36000],
+                                backgroundColor: '#ff6b6b',
+                                borderWidth: 0
+                            },
+                            {
+                                label: 'Profit',
+                                data: [33000, 34000, 42450, 34000],
+                                backgroundColor: '#20c997',
+                                borderWidth: 0
+                            }
+                        ]
+                    },
+                    options: {
+                        responsive: true,
+                        scales: {
+                            y: {
+                                beginAtZero: true,
+                                ticks: {
+                                    callback: function(value) {
+                                        return '₹' + value.toLocaleString();
+                                    }
+                                }
+                            }
+                        },
+                        plugins: {
+                            tooltip: {
+                                callbacks: {
+                                    label: function(context) {
+                                        return context.dataset.label + ': ₹' + context.raw.toLocaleString();
+                                    }
+                                }
+                            }
+                        }
+                    }
+                });
                 
-                let html = `
-                    <h3>Expense Report</h3>
-                    <div class="card mb-4">
-                        <div class="card-body">
-                            <h5 class="card-title">Summary</h5>
-                            <div class="row">
-                                <div class="col-md-4">
-                                    <div class="mb-3">
-                                        <h6 class="text-muted">Total Expenses</h6>
-                                        <h3>₹${summary.totalExpenses.toFixed(2)}</h3>
-                                    </div>
-                                </div>
-                                <div class="col-md-8">
-                                    <div class="mb-3">
-                                        <h6 class="text-muted">Period</h6>
-                                        <p>${summary.period.startDate} to ${summary.period.endDate}</p>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                `;
+                // Revenue Chart
+                const revenueChartCtx = document.getElementById('revenueChart').getContext('2d');
+                new Chart(revenueChartCtx, {
+                    type: 'pie',
+                    data: {
+                        labels: ['Product Sales', 'Service Revenue', 'Other Revenue'],
+                        datasets: [{
+                            data: [265500, 18250, 2000],
+                            backgroundColor: [
+                                '#4a6bdf',
+                                '#20c997',
+                                '#ffd166'
+                            ],
+                            borderWidth: 0
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        plugins: {
+                            tooltip: {
+                                callbacks: {
+                                    label: function(context) {
+                                        const value = context.raw;
+                                        const total = context.dataset.data.reduce((a, b) => a + b, 0);
+                                        const percentage = Math.round((value / total) * 100);
+                                        return context.label + ': ₹' + value.toLocaleString() + ' (' + percentage + '%)';
+                                    }
+                                }
+                            }
+                        }
+                    }
+                });
                 
-                // Expenses by category
-                if (expensesByCategory && expensesByCategory.length > 0) {
-                    html += `
-                        <h5 class="mt-4">Expenses by Category</h5>
-                        <div class="table-responsive">
-                            <table class="table table-striped">
-                                <thead>
-                                    <tr>
-                                        <th>Category</th>
-                                        <th>Amount</th>
-                                        <th>Percentage</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                    `;
-                    
-                    expensesByCategory.forEach(category => {
-                        const percentage = ((category.amount / summary.totalExpenses) * 100).toFixed(2);
-                        html += `
-                            <tr>
-                                <td>${category.category}</td>
-                                <td>₹${category.amount.toFixed(2)}</td>
-                                <td>${percentage}%</td>
-                            </tr>
-                        `;
-                    });
-                    
-                    html += `
-                                </tbody>
-                            </table>
-                        </div>
-                    `;
-                }
-                
-                // Expense details
-                if (expenses && expenses.length > 0) {
-                    html += `
-                        <h5 class="mt-4">Expense Details</h5>
-                        <div class="table-responsive">
-                            <table class="table table-striped">
-                                <thead>
-                                    <tr>
-                                        <th>Date</th>
-                                        <th>Title</th>
-                                        <th>Category</th>
-                                        <th>Amount</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                    `;
-                    
-                    expenses.forEach(expense => {
-                        const date = new Date(expense.date).toLocaleDateString();
-                        html += `
-                            <tr>
-                                <td>${date}</td>
-                                <td>${expense.title}</td>
-                                <td>${expense.category}</td>
-                                <td>₹${expense.amount.toFixed(2)}</td>
-                            </tr>
-                        `;
-                    });
-                    
-                    html += `
-                                </tbody>
-                            </table>
-                        </div>
-                    `;
-                }
-                
-                reportContent.innerHTML = html;
+                // Expense Chart
+                const expenseChartCtx = document.getElementById('expenseChart').getContext('2d');
+                new Chart(expenseChartCtx, {
+                    type: 'doughnut',
+                    data: {
+                        labels: ['Cost of Goods', 'Rent', 'Utilities', 'Salaries', 'Marketing', 'Other'],
+                        datasets: [{
+                            data: [105800, 12000, 4500, 15000, 3000, 2000],
+                            backgroundColor: [
+                                '#ff6b6b',
+                                '#ffd166',
+                                '#4a6bdf',
+                                '#20c997',
+                                '#6f42c1',
+                                '#adb5bd'
+                            ],
+                            borderWidth: 0
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        plugins: {
+                            tooltip: {
+                                callbacks: {
+                                    label: function(context) {
+                                        const value = context.raw;
+                                        const total = context.dataset.data.reduce((a, b) => a + b, 0);
+                                        const percentage = Math.round((value / total) * 100);
+                                        return context.label + ': ₹' + value.toLocaleString() + ' (' + percentage + '%)';
+                                    }
+                                }
+                            }
+                        }
+                    }
+                });
             }
             
-            function renderProfitLossReport(data) {
-                const { summary, expensesByCategory } = data;
+            function initializeInventoryCharts() {
+                // Category Inventory Chart
+                const categoryInventoryChartCtx = document.getElementById('categoryInventoryChart').getContext('2d');
+                new Chart(categoryInventoryChartCtx, {
+                    type: 'pie',
+                    data: {
+                        labels: ['Electronics', 'Clothing', 'Home & Kitchen', 'Beauty', 'Sports'],
+                        datasets: [{
+                            data: [45, 30, 15, 7, 3],
+                            backgroundColor: [
+                                '#4a6bdf',
+                                '#ff6b6b',
+                                '#20c997',
+                                '#ffd166',
+                                '#6f42c1'
+                            ],
+                            borderWidth: 0
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        plugins: {
+                            tooltip: {
+                                callbacks: {
+                                    label: function(context) {
+                                        const value = context.raw;
+                                        const total = context.dataset.data.reduce((a, b) => a + b, 0);
+                                        const percentage = Math.round((value / total) * 100);
+                                        return context.label + ': ' + value + ' items (' + percentage + '%)';
+                                    }
+                                }
+                            }
+                        }
+                    }
+                });
                 
-                let html = `
-                    <h3>Profit & Loss Report</h3>
-                    <div class="card mb-4">
-                        <div class="card-body">
-                            <div class="table-responsive">
-                                <table class="table table-borderless">
-                                    <tbody>
-                                        <tr>
-                                            <td colspan="2"><h5>Revenue</h5></td>
-                                        </tr>
-                                        <tr>
-                                            <td>Sales Revenue</td>
-                                            <td class="text-end">₹${summary.revenue.toFixed(2)}</td>
-                                        </tr>
-                                        <tr>
-                                            <td>Cost of Goods Sold</td>
-                                            <td class="text-end">₹${summary.cogs.toFixed(2)}</td>
-                                        </tr>
-                                        <tr class="table-active">
-                                            <td><strong>Gross Profit</strong></td>
-                                            <td class="text-end"><strong>₹${summary.grossProfit.toFixed(2)}</strong></td>
-                                        </tr>
-                                        <tr>
-                                            <td>Gross Profit Margin</td>
-                                            <td class="text-end">${summary.grossProfitMargin.toFixed(2)}%</td>
-                                        </tr>
-                                        
-                                        <tr>
-                                            <td colspan="2"><h5 class="mt-4">Expenses</h5></td>
-                                        </tr>
-                    `;
-                    
-                // List expense categories
-                if (expensesByCategory && expensesByCategory.length > 0) {
-                    expensesByCategory.forEach(category => {
-                        html += `
-                            <tr>
-                                <td>${category.category}</td>
-                                <td class="text-end">₹${category.amount.toFixed(2)}</td>
-                            </tr>
-                        `;
-                    });
-                }
-                
-                html += `
-                                        <tr class="table-active">
-                                            <td><strong>Total Expenses</strong></td>
-                                            <td class="text-end"><strong>₹${summary.totalExpenses.toFixed(2)}</strong></td>
-                                        </tr>
-                                        
-                                        <tr class="table-primary">
-                                            <td><h5>Net Profit</h5></td>
-                                            <td class="text-end"><h5>₹${summary.netProfit.toFixed(2)}</h5></td>
-                                        </tr>
-                                        <tr>
-                                            <td>Net Profit Margin</td>
-                                            <td class="text-end">${summary.netProfitMargin.toFixed(2)}%</td>
-                                        </tr>
-                                    </tbody>
-                                </table>
-                            </div>
-                        </div>
-                    </div>
-                `;
-                
-                reportContent.innerHTML = html;
+                // Value Distribution Chart
+                const valueDistributionChartCtx = document.getElementById('valueDistributionChart').getContext('2d');
+                new Chart(valueDistributionChartCtx, {
+                    type: 'bar',
+                    data: {
+                        labels: ['Low Value (<₹1000)', 'Medium Value (₹1000-₹5000)', 'High Value (>₹5000)'],
+                        datasets: [{
+                            label: 'Number of Products',
+                            data: [48, 64, 45],
+                            backgroundColor: [
+                                '#ffd166',
+                                '#4a6bdf',
+                                '#20c997'
+                            ],
+                            borderWidth: 0
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        scales: {
+                            y: {
+                                beginAtZero: true
+                            }
+                        }
+                    }
+                });
             }
             
-            function renderInventoryReport(data) {
-                const { summary, productsByCategory, lowStockProducts } = data;
+            function initializeExpenseCharts() {
+                // Expense Trend Chart
+                const expenseTrendChartCtx = document.getElementById('expenseTrendChart').getContext('2d');
+                new Chart(expenseTrendChartCtx, {
+                    type: 'line',
+                    data: {
+                        labels: ['May 1', 'May 5', 'May 10', 'May 15', 'May 20', 'May 25', 'May 30'],
+                        datasets: [{
+                            label: 'Expenses',
+                            data: [1500, 15000, 2800, 3500, 4000, 12000, 3700],
+                            backgroundColor: 'rgba(255, 107, 107, 0.2)',
+                            borderColor: '#ff6b6b',
+                            borderWidth: 2,
+                            tension: 0.3,
+                            fill: true
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        scales: {
+                            y: {
+                                beginAtZero: true,
+                                ticks: {
+                                    callback: function(value) {
+                                        return '₹' + value.toLocaleString();
+                                    }
+                                }
+                            }
+                        },
+                        plugins: {
+                            tooltip: {
+                                callbacks: {
+                                    label: function(context) {
+                                        return 'Expenses: ₹' + context.raw.toLocaleString();
+                                    }
+                                }
+                            }
+                        }
+                    }
+                });
                 
-                let html = `
-                    <h3>Inventory Report</h3>
-                    <div class="card mb-4">
-                        <div class="card-body">
-                            <h5 class="card-title">Summary</h5>
-                            <div class="row">
-                                <div class="col-md-3">
-                                    <div class="mb-3">
-                                        <h6 class="text-muted">Total Products</h6>
-                                        <h3>${summary.totalProducts}</h3>
-                                    </div>
-                                </div>
-                                <div class="col-md-3">
-                                    <div class="mb-3">
-                                        <h6 class="text-muted">Inventory Value</h6>
-                                        <h3>₹${summary.totalInventoryValue.toFixed(2)}</h3>
-                                    </div>
-                                </div>
-                                <div class="col-md-3">
-                                    <div class="mb-3">
-                                        <h6 class="text-muted">Potential Revenue</h6>
-                                        <h3>₹${summary.potentialRevenue.toFixed(2)}</h3>
-                                    </div>
-                                </div>
-                                <div class="col-md-3">
-                                    <div class="mb-3">
-                                        <h6 class="text-muted">Potential Profit</h6>
-                                        <h3>₹${summary.potentialProfit.toFixed(2)}</h3>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                `;
+                // Expense Category Chart
+                const expenseCategoryChartCtx = document.getElementById('expenseCategoryChart').getContext('2d');
+                new Chart(expenseCategoryChartCtx, {
+                    type: 'doughnut',
+                    data: {
+                        labels: ['Utilities', 'Rent', 'Salary', 'Marketing', 'Supplies', 'Other'],
+                        datasets: [{
+                            data: [7300, 12000, 15000, 3000, 4500, 700],
+                            backgroundColor: [
+                                '#4a6bdf',
+                                '#ff6b6b',
+                                '#20c997',
+                                '#ffd166',
+                                '#6f42c1',
+                                '#adb5bd'
+                            ],
+                            borderWidth: 0
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        plugins: {
+                            tooltip: {
+                                callbacks: {
+                                    label: function(context) {
+                                        const value = context.raw;
+                                        const total = context.dataset.data.reduce((a, b) => a + b, 0);
+                                        const percentage = Math.round((value / total) * 100);
+                                        return context.label + ': ₹' + value.toLocaleString() + ' (' + percentage + '%)';
+                                    }
+                                }
+                            }
+                        }
+                    }
+                });
                 
-                // Inventory by category
-                if (productsByCategory) {
-                    html += `
-                        <h5 class="mt-4">Inventory by Category</h5>
-                        <div class="table-responsive">
-                            <table class="table table-striped">
-                                <thead>
-                                    <tr>
-                                        <th>Category</th>
-                                        <th>Items</th>
-                                        <th>Value</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                    `;
-                    
-                    Object.entries(productsByCategory).forEach(([category, data]) => {
-                        html += `
-                            <tr>
-                                <td>${category}</td>
-                                <td>${data.count}</td>
-                                <td>₹${data.value.toFixed(2)}</td>
-                            </tr>
-                        `;
-                    });
-                    
-                    html += `
-                                </tbody>
-                            </table>
-                        </div>
-                    `;
-                }
-                
-                // Low stock products
-                if (lowStockProducts && lowStockProducts.length > 0) {
-                    html += `
-                        <div class="card mt-4 border-warning">
-                            <div class="card-header bg-warning text-white">
-                                <h5 class="mb-0">Low Stock Products</h5>
-                            </div>
-                            <div class="card-body">
-                                <div class="table-responsive">
-                                    <table class="table">
-                                        <thead>
-                                            <tr>
-                                                <th>Product</th>
-                                                <th>SKU</th>
-                                                <th>Quantity</th>
-                                                <th>Reorder Level</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody>
-                    `;
-                    
-                    lowStockProducts.forEach(product => {
-                        html += `
-                            <tr>
-                                <td>${product.name}</td>
-                                <td>${product.sku || 'N/A'}</td>
-                                <td>${product.quantity}</td>
-                                <td>${product.reorderLevel}</td>
-                            </tr>
-                        `;
-                    });
-                    
-                    html += `
-                                        </tbody>
-                                    </table>
-                                </div>
-                            </div>
-                        </div>
-                    `;
-                }
-                
-                reportContent.innerHTML = html;
-            }
-            
-            // Helper function for status badges
-            function getStatusBadgeClass(status) {
-                if (!status) return 'bg-secondary';
-                
-                switch(status.toLowerCase()) {
-                    case 'paid':
-                        return 'bg-success';
-                    case 'partial':
-                        return 'bg-warning';
-                    case 'unpaid':
-                        return 'bg-danger';
-                    default:
-                        return 'bg-secondary';
-                }
+                // Expense Type Chart
+                const expenseTypeChartCtx = document.getElementById('expenseTypeChart').getContext('2d');
+                new Chart(expenseTypeChartCtx, {
+                    type: 'pie',
+                    data: {
+                        labels: ['Recurring', 'One-time'],
+                        datasets: [{
+                            data: [29800, 12700],
+                            backgroundColor: [
+                                '#4a6bdf',
+                                '#ff6b6b'
+                            ],
+                            borderWidth: 0
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        plugins: {
+                            tooltip: {
+                                callbacks: {
+                                    label: function(context) {
+                                        const value = context.raw;
+                                        const total = context.dataset.data.reduce((a, b) => a + b, 0);
+                                        const percentage = Math.round((value / total) * 100);
+                                        return context.label + ': ₹' + value.toLocaleString() + ' (' + percentage + '%)';
+                                    }
+                                }
+                            }
+                        }
+                    }
+                });
             }
         });
     </script>
