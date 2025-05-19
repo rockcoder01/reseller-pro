@@ -1,0 +1,548 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard - ReSellPro</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f8f9fa;
+        }
+        .navbar {
+            background-color: #343a40;
+        }
+        .navbar-brand {
+            font-weight: bold;
+            color: #ffffff;
+        }
+        .sidebar {
+            position: fixed;
+            top: 56px;
+            bottom: 0;
+            left: 0;
+            z-index: 100;
+            padding: 0;
+            box-shadow: inset -1px 0 0 rgba(0, 0, 0, .1);
+            background-color: #fff;
+            width: 250px;
+            transition: all 0.3s;
+        }
+        .sidebar .nav-link {
+            color: #333;
+            padding: 12px 20px;
+            margin-bottom: 5px;
+            border-radius: 0;
+            transition: all 0.3s;
+        }
+        .sidebar .nav-link:hover, .sidebar .nav-link.active {
+            color: #4a6bdf;
+            background-color: #f8f9fa;
+            border-left: 3px solid #4a6bdf;
+            padding-left: 17px;
+        }
+        .sidebar .nav-link i {
+            margin-right: 10px;
+            width: 20px;
+            text-align: center;
+        }
+        .main-content {
+            margin-left: 250px;
+            padding: 20px;
+            transition: all 0.3s;
+        }
+        @media (max-width: 768px) {
+            .sidebar {
+                margin-left: -250px;
+            }
+            .sidebar.active {
+                margin-left: 0;
+            }
+            .main-content {
+                margin-left: 0;
+            }
+            .main-content.active {
+                margin-left: 250px;
+            }
+        }
+        .stat-card {
+            border-radius: 10px;
+            border: none;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+            transition: transform 0.3s;
+            height: 100%;
+        }
+        .stat-card:hover {
+            transform: translateY(-5px);
+        }
+        .stat-icon {
+            font-size: 2.5rem;
+            margin-bottom: 15px;
+            color: #4a6bdf;
+        }
+        .chart-container {
+            position: relative;
+            height: 280px;
+            width: 100%;
+        }
+        .table-card {
+            border-radius: 10px;
+            border: none;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+        }
+        .badge-low-stock {
+            background-color: #ff6b6b;
+            color: white;
+        }
+        .badge-pending {
+            background-color: #feca57;
+            color: white;
+        }
+        .badge-paid {
+            background-color: #1dd1a1;
+            color: white;
+        }
+        .avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background-color: #4a6bdf;
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 16px;
+        }
+        .dropdown-toggle::after {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <!-- Top Navigation -->
+    <nav class="navbar navbar-expand-lg navbar-dark sticky-top">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="#">ReSellPro</a>
+            <button class="navbar-toggler" type="button" id="sidebarToggle">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <form class="d-flex ms-auto me-3">
+                    <div class="input-group">
+                        <input class="form-control" type="search" placeholder="Search" aria-label="Search">
+                        <button class="btn btn-outline-light" type="submit"><i class="bi bi-search"></i></button>
+                    </div>
+                </form>
+                
+                <ul class="navbar-nav">
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" id="notificationsDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                            <i class="bi bi-bell"></i>
+                            <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
+                                3
+                            </span>
+                        </a>
+                        <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="notificationsDropdown">
+                            <li><h6 class="dropdown-header">Notifications</h6></li>
+                            <li><a class="dropdown-item" href="#">Low stock alert: 5 products</a></li>
+                            <li><a class="dropdown-item" href="#">New order received: INV-1001</a></li>
+                            <li><a class="dropdown-item" href="#">Payment received: ₹15,000</a></li>
+                            <li><hr class="dropdown-divider"></li>
+                            <li><a class="dropdown-item text-primary" href="#">View all notifications</a></li>
+                        </ul>
+                    </li>
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle d-flex align-items-center" href="#" id="userDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                            <div class="avatar me-2" id="userAvatar">JS</div>
+                            <span id="userName">User</span>
+                        </a>
+                        <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="userDropdown">
+                            <li><a class="dropdown-item" href="#"><i class="bi bi-person me-2"></i>Profile</a></li>
+                            <li><a class="dropdown-item" href="#"><i class="bi bi-gear me-2"></i>Settings</a></li>
+                            <li><hr class="dropdown-divider"></li>
+                            <li><a class="dropdown-item" href="#" id="logoutButton"><i class="bi bi-box-arrow-right me-2"></i>Logout</a></li>
+                        </ul>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Sidebar -->
+    <div class="sidebar">
+        <ul class="nav flex-column mt-4">
+            <li class="nav-item">
+                <a class="nav-link active" href="dashboard.html">
+                    <i class="bi bi-speedometer2"></i> Dashboard
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="#">
+                    <i class="bi bi-box-seam"></i> Inventory
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="#">
+                    <i class="bi bi-receipt"></i> Invoices
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="#">
+                    <i class="bi bi-currency-rupee"></i> Expenses
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="#">
+                    <i class="bi bi-people"></i> Employees
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="reports.html">
+                    <i class="bi bi-bar-chart"></i> Reports
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="#">
+                    <i class="bi bi-gear"></i> Settings
+                </a>
+            </li>
+        </ul>
+    </div>
+
+    <!-- Main Content -->
+    <div class="main-content">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h2>Dashboard</h2>
+            <div class="btn-group">
+                <button type="button" class="btn btn-outline-secondary">Today</button>
+                <button type="button" class="btn btn-outline-secondary">Week</button>
+                <button type="button" class="btn btn-outline-secondary active">Month</button>
+                <button type="button" class="btn btn-outline-secondary">Year</button>
+            </div>
+        </div>
+
+        <!-- Stats Cards -->
+        <div class="row g-4 mb-4">
+            <div class="col-md-3">
+                <div class="card stat-card">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between">
+                            <div>
+                                <h6 class="card-subtitle mb-2 text-muted">Total Sales</h6>
+                                <h3 class="card-title mb-0">₹45,600</h3>
+                                <small class="text-success"><i class="bi bi-arrow-up"></i> 12% from last month</small>
+                            </div>
+                            <div class="stat-icon">
+                                <i class="bi bi-currency-rupee"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card stat-card">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between">
+                            <div>
+                                <h6 class="card-subtitle mb-2 text-muted">Total Orders</h6>
+                                <h3 class="card-title mb-0">24</h3>
+                                <small class="text-success"><i class="bi bi-arrow-up"></i> 5% from last month</small>
+                            </div>
+                            <div class="stat-icon">
+                                <i class="bi bi-bag"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card stat-card">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between">
+                            <div>
+                                <h6 class="card-subtitle mb-2 text-muted">Total Expenses</h6>
+                                <h3 class="card-title mb-0">₹12,500</h3>
+                                <small class="text-danger"><i class="bi bi-arrow-up"></i> 8% from last month</small>
+                            </div>
+                            <div class="stat-icon">
+                                <i class="bi bi-cash-stack"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card stat-card">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between">
+                            <div>
+                                <h6 class="card-subtitle mb-2 text-muted">Net Profit</h6>
+                                <h3 class="card-title mb-0">₹33,100</h3>
+                                <small class="text-success"><i class="bi bi-arrow-up"></i> 14% from last month</small>
+                            </div>
+                            <div class="stat-icon">
+                                <i class="bi bi-graph-up"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Charts Row -->
+        <div class="row g-4 mb-4">
+            <div class="col-md-8">
+                <div class="card">
+                    <div class="card-body">
+                        <h5 class="card-title">Sales Overview</h5>
+                        <p class="text-muted">Monthly revenue for the current year</p>
+                        <div class="chart-container">
+                            <canvas id="salesChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card">
+                    <div class="card-body">
+                        <h5 class="card-title">Expense Breakdown</h5>
+                        <p class="text-muted">By category</p>
+                        <div class="chart-container">
+                            <canvas id="expenseChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Tables Row -->
+        <div class="row g-4">
+            <div class="col-md-6">
+                <div class="card table-card">
+                    <div class="card-header d-flex justify-content-between align-items-center">
+                        <h5 class="mb-0">Recent Invoices</h5>
+                        <a href="#" class="btn btn-sm btn-outline-primary">View All</a>
+                    </div>
+                    <div class="card-body">
+                        <div class="table-responsive">
+                            <table class="table table-hover">
+                                <thead>
+                                    <tr>
+                                        <th>Invoice #</th>
+                                        <th>Customer</th>
+                                        <th>Amount</th>
+                                        <th>Status</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td>INV-1004</td>
+                                        <td>Raj Electronics</td>
+                                        <td>₹8,500</td>
+                                        <td><span class="badge badge-pending">Pending</span></td>
+                                    </tr>
+                                    <tr>
+                                        <td>INV-1003</td>
+                                        <td>Krishna Traders</td>
+                                        <td>₹12,300</td>
+                                        <td><span class="badge badge-paid">Paid</span></td>
+                                    </tr>
+                                    <tr>
+                                        <td>INV-1002</td>
+                                        <td>Mehta Brothers</td>
+                                        <td>₹4,200</td>
+                                        <td><span class="badge badge-paid">Paid</span></td>
+                                    </tr>
+                                    <tr>
+                                        <td>INV-1001</td>
+                                        <td>Patel Enterprises</td>
+                                        <td>₹7,800</td>
+                                        <td><span class="badge badge-paid">Paid</span></td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="card table-card">
+                    <div class="card-header d-flex justify-content-between align-items-center">
+                        <h5 class="mb-0">Low Stock Products</h5>
+                        <a href="#" class="btn btn-sm btn-outline-primary">View All</a>
+                    </div>
+                    <div class="card-body">
+                        <div class="table-responsive">
+                            <table class="table table-hover">
+                                <thead>
+                                    <tr>
+                                        <th>Product</th>
+                                        <th>SKU</th>
+                                        <th>In Stock</th>
+                                        <th>Action</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td>Smartphone X Pro</td>
+                                        <td>SP-001</td>
+                                        <td><span class="badge badge-low-stock">3</span></td>
+                                        <td><button class="btn btn-sm btn-outline-primary">Reorder</button></td>
+                                    </tr>
+                                    <tr>
+                                        <td>Bluetooth Headphones</td>
+                                        <td>BH-102</td>
+                                        <td><span class="badge badge-low-stock">5</span></td>
+                                        <td><button class="btn btn-sm btn-outline-primary">Reorder</button></td>
+                                    </tr>
+                                    <tr>
+                                        <td>Wireless Charger</td>
+                                        <td>WC-055</td>
+                                        <td><span class="badge badge-low-stock">4</span></td>
+                                        <td><button class="btn btn-sm btn-outline-primary">Reorder</button></td>
+                                    </tr>
+                                    <tr>
+                                        <td>Smart Watch Series 5</td>
+                                        <td>SW-201</td>
+                                        <td><span class="badge badge-low-stock">2</span></td>
+                                        <td><button class="btn btn-sm btn-outline-primary">Reorder</button></td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Check if user is logged in
+            const token = localStorage.getItem('token');
+            const user = JSON.parse(localStorage.getItem('user') || '{}');
+            
+            if (!token) {
+                // Redirect to login if not logged in
+                window.location.href = 'login.html';
+                return;
+            }
+            
+            // Set user display name and avatar
+            const userNameElement = document.getElementById('userName');
+            const userAvatarElement = document.getElementById('userAvatar');
+            
+            if (user.firstName && user.lastName) {
+                userNameElement.textContent = `${user.firstName} ${user.lastName}`;
+                userAvatarElement.textContent = `${user.firstName.charAt(0)}${user.lastName.charAt(0)}`;
+            } else if (user.username) {
+                userNameElement.textContent = user.username;
+                userAvatarElement.textContent = user.username.substring(0, 2).toUpperCase();
+            }
+            
+            // Logout functionality
+            document.getElementById('logoutButton').addEventListener('click', function(e) {
+                e.preventDefault();
+                localStorage.removeItem('token');
+                localStorage.removeItem('user');
+                window.location.href = 'login.html';
+            });
+            
+            // Toggle sidebar on mobile
+            document.getElementById('sidebarToggle').addEventListener('click', function() {
+                document.querySelector('.sidebar').classList.toggle('active');
+                document.querySelector('.main-content').classList.toggle('active');
+            });
+            
+            // Initialize Charts
+            const salesChartCtx = document.getElementById('salesChart').getContext('2d');
+            const salesChart = new Chart(salesChartCtx, {
+                type: 'line',
+                data: {
+                    labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
+                    datasets: [{
+                        label: 'Sales',
+                        data: [12000, 19000, 15000, 25000, 22000, 30000, 28000, 32000, 45600, 39000, 41000, 0],
+                        borderColor: '#4a6bdf',
+                        backgroundColor: 'rgba(74, 107, 223, 0.1)',
+                        borderWidth: 2,
+                        fill: true,
+                        tension: 0.4
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            display: false
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            ticks: {
+                                callback: function(value) {
+                                    return '₹' + value.toLocaleString();
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+            
+            const expenseChartCtx = document.getElementById('expenseChart').getContext('2d');
+            const expenseChart = new Chart(expenseChartCtx, {
+                type: 'doughnut',
+                data: {
+                    labels: ['Rent', 'Utilities', 'Inventory', 'Marketing', 'Salaries', 'Others'],
+                    datasets: [{
+                        data: [3000, 1500, 4500, 1000, 2000, 500],
+                        backgroundColor: [
+                            '#4a6bdf',
+                            '#45aaf2',
+                            '#a55eea',
+                            '#fd9644',
+                            '#fc5c65',
+                            '#26de81'
+                        ],
+                        borderWidth: 0
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'right'
+                        }
+                    }
+                }
+            });
+            
+            // Fetch data from backend (If API is available)
+            /*
+            fetch('http://localhost:3000/api/dashboard', {
+                headers: {
+                    'Authorization': `Bearer ${token}`
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                // Update dashboard with real data
+                console.log('Dashboard data:', data);
+            })
+            .catch(error => {
+                console.error('Error fetching dashboard data:', error);
+            });
+            */
+        });
+    </script>
+</body>
+</html>
